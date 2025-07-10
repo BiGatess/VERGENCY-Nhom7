@@ -33,18 +33,23 @@ app.use('/api/upload', uploadRoutes);
 
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
-const buildPath = path.join(__dirname, '../frontend/build');
-app.use(express.static(buildPath));
+if (process.env.NODE_ENV === 'production') {
+    const frontendBuildPath = path.join(__dirname, '../frontend/build');
+    app.use(express.static(frontendBuildPath));
 
-app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../frontend/build', 'index.html'));
-});
-
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../frontend', 'build', 'index.html'));
+    });
+} else {
+    app.get('/', (req, res) => {
+        res.send('API is running in development mode...');
+    });
+}
 
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server đang chạy ở cổng ${PORT}`);
+    console.log(`🚀 Server is running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
