@@ -1,0 +1,58 @@
+/* frontend/src/components/AdminLayout.css */
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f4f7fa;
+}
+
+.admin-sidebar {
+    width: 250px;
+    background-color: #2c3e50; /* Màu nền tối cho sidebar */
+    color: white;
+    padding: 20px;
+    flex-shrink: 0; /* Ngăn sidebar bị co lại khi nội dung dài */
+}
+
+.admin-sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+}
+
+.admin-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-sidebar li {
+    margin-bottom: 15px;
+}
+
+.admin-sidebar a {
+    color: #bdc3c7; /* Màu chữ xám nhạt */
+    text-decoration: none;
+    display: block;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.admin-sidebar a:hover {
+    background-color: #34495e; /* Màu nền khi di chuột qua */
+    color: white;
+}
+
+/* Style cho link đang được active (đang ở trang đó) */
+.admin-sidebar a.active {
+    background-color: #1abc9c; /* Màu xanh nổi bật */
+    color: white;
+    font-weight: bold;
+}
+
+.admin-content {
+    flex-grow: 1; /* Để content chiếm hết không gian còn lại */
+    padding: 30px;
+    overflow-y: auto; /* Thêm thanh cuộn nếu nội dung dài */
+}
