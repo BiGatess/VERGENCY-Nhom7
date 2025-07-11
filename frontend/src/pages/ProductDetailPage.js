@@ -10,9 +10,7 @@ import { FaShoppingCart, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { FiTruck, FiRefreshCw, FiCreditCard, FiPhoneCall } from 'react-icons/fi';
 import RelatedProducts from '../components/RelatedProducts';
 
-const API_URL = process.env.NODE_ENV === 'production' 
-    ? 'https://vergency-nhom7-1.onrender.com' 
-    : 'http://localhost:5000';               
+const API_URL = 'http://localhost:5000'; 
 const THUMBNAILS_TO_SHOW = 4; 
 
 const useViewHistory = (currentProduct) => {

@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors'; 
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -20,17 +20,8 @@ connectDB();
 
 const app = express();
 
-const corsOptions = {
-  origin: 'https://vergency-nhom7.onrender.com', 
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
-
+app.use(cors());
 app.use(express.json());
-
-app.get('/api/v1', (req, res) => {
-  res.send('API v1 is running...');
-});
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/categories', categoryRoutes);
@@ -39,14 +30,31 @@ app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/upload', uploadRoutes);
 
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 app.use('/images', express.static(path.join(__dirname, '../../public/images')));
+
+
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, '../frontend/build');
+  app.use(express.static(frontendBuildPath));
+
+  app.get('*', (req, res) =>
+    res.sendFile(path.resolve(__dirname, '../frontend/build', 'index.html'))
+  );
+} else {
+  app.get('/api/v1', (req, res) => {
+    res.send('API v1 is running in development...');
+  });
+}
+
 
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+  console.log(`🚀 Server đang chạy ở cổng ${PORT} trong môi trường ${process.env.NODE_ENV}`);
 });
