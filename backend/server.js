@@ -1,1 +1,0 @@
-Get-Clipboard | Set-Content -Path "backend/server.js"
