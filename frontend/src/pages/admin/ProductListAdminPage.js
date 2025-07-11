@@ -1,23 +1,19 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { fetchProducts } from '../../store/productSlice'; // Đảm bảo đường dẫn này đúng
+import { fetchProducts } from '../../store/productSlice'; 
 import Spinner from '../../components/Spinner';
 
 const ProductListAdminPage = () => {
     const dispatch = useDispatch();
-    // Lấy đúng state từ Redux store
     const { products, status, error } = useSelector((state) => state.products);
 
     useEffect(() => {
-        // Luôn fetch dữ liệu mới nhất khi vào trang
         dispatch(fetchProducts());
     }, [dispatch]);
 
     const handleDelete = (id) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-            // Logic xóa sản phẩm sẽ được thêm ở đây
-            // dispatch(deleteProduct(id));
             console.log('Xóa sản phẩm với ID:', id);
             alert('Chức năng xóa đang được phát triển!');
         }

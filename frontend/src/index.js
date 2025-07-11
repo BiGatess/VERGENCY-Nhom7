@@ -19,7 +19,6 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage'; 
 import PrivateRoute from './components/PrivateRoute';
 
-// Import các component cho trang Admin
 import AdminRoute from './components/AdminRoute';
 import AdminLayout from './components/AdminLayout';
 import DashboardPage from './pages/admin/DashboardPage';
