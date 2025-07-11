@@ -1,13 +1,12 @@
-import axios from 'axios';
-const API_URL = 'http://localhost:5000/api/auth';
+import api from './api'; 
 
 const userApi = {
     login: async (credentials) => {
-        const { data } = await axios.post(`${API_URL}/login`, credentials);
+        const { data } = await api.post('/auth/login', credentials);
         return data;
     },
     register: async (userData) => {
-        const { data } = await axios.post(`${API_URL}/register`, userData);
+        const { data } = await api.post('/auth/register', userData);
         return data;
     }
 };

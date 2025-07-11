@@ -1,38 +1,22 @@
-import axios from 'axios';
-
-const API_URL = '/api/v1/products';
-
-const getAllProducts = async (params) => {
-  const response = await axios.get(API_URL, { params });
-  return response.data;
-};
-
-const getProductById = async (productId) => {
-  const response = await axios.get(`${API_URL}/${productId}`);
-  return response.data;
-};
-
-const getRelatedProducts = async (productId) => {
-  const response = await axios.get(`${API_URL}/${productId}/related`);
-  return response.data;
-};
-
-const createProduct = async (productData, token) => {
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  const response = await axios.post(API_URL, productData, config);
-  return response.data;
-};
+import api from './api'; 
 
 const productApi = {
-  getAllProducts,
-  getProductById,
-  getRelatedProducts,
-  createProduct,
+  getAllProducts: async (params) => {
+    const { data } = await api.get('/products', { params });
+    return data;
+  },
+  getProductById: async (productId) => {
+    const { data } = await api.get(`/products/${productId}`);
+    return data;
+  },
+  getRelatedProducts: async (productId) => {
+    const { data } = await api.get(`/products/${productId}/related`);
+    return data;
+  },
+  createProduct: async (productData) => {
+    const { data } = await api.post('/products', productData);
+    return data;
+  },
 };
 
 export default productApi;
