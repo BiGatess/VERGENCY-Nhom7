@@ -21,7 +21,7 @@ function App() {
     };
   }, [location.pathname]); 
 
-  const minimalLayoutRoutes = ['/checkout'];
+  const minimalLayoutRoutes = ['/checkout', '/admin'];
   
   const useMinimalLayout = minimalLayoutRoutes.some(route => location.pathname.startsWith(route));
 

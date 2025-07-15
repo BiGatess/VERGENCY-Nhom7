@@ -13,5 +13,6 @@ export const store = configureStore({
     products: productReducer,
     categories: categoryReducer,
     orders: orderReducer,
+    
   },
 });

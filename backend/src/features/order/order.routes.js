@@ -1,20 +1,26 @@
 import express from 'express';
-
 import {
     addOrderItems,
-    getOrders,
-    updateOrderStatus
+    getAllOrders,
+    getOrderById,
+    updateOrderStatus,
+    getMyOrders 
 } from './order.controller.js';
 import { protect, admin } from '../auth/auth.middleware.js';
 
 const router = express.Router();
 
 router.route('/')
-    .post(protect, addOrderItems)       // User thường tạo đơn hàng
-    .get(protect, admin, getOrders);    // Admin lấy tất cả đơn hàng
+    .post(protect, addOrderItems)       
+    .get(protect, admin, getAllOrders);   
 
-// Route mới để admin cập nhật trạng thái
+router.route('/myorders')
+    .get(protect, getMyOrders);
+
 router.route('/:id/status')
     .put(protect, admin, updateOrderStatus);
+
+router.route('/:id')
+    .get(protect, getOrderById);
 
 export default router;

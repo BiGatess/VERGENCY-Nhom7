@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = 'http://localhost:5000/api/v1/auth';
 
 const userApi = {
     login: async (credentials) => {

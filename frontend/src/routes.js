@@ -1,48 +1,77 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import App from './App'; 
+// Tên file: frontend/src/routes.js
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import App from './App';
+
+import PrivateRoute from './components/PrivateRoute';
+
+import AdminLayout from './components/AdminLayout';
+import ProfilePage from './pages/ProfilePage';
 
 import HomePage from './pages/HomePage';
 import ProductListPage from './pages/ProductListPage';
 import ProductDetailPage from './pages/ProductDetailPage';
-import AboutPage from './pages/AboutPage';
-import ContactPage from './pages/ContactPage';
-import BlogPage from './pages/BlogPage';
-import AuthPage from './pages/AuthPage'; 
-import CheckoutPage from './pages/CheckoutPage'; 
-
-import PrivateRoute from './components/PrivateRoute'; 
+import CartPage from './pages/CartPage';
+import AuthPage from './pages/AuthPage';
+import NotFoundPage from './pages/NotFoundPage';
+import CheckoutPage from './pages/CheckoutPage';
+import UserProfileDetails from './pages/UserProfileDetails';
+import MyOrdersPage from './pages/MyOrdersPage';
+import AddressPage from './pages/AddressPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 import DashboardPage from './pages/admin/DashboardPage';
-import OrderListPage from './pages/admin/OrderListPage';
+import ProductListAdminPage from './pages/admin/ProductListAdminPage';
 import ProductCreatePage from './pages/admin/ProductCreatePage';
+import ProductEditPage from './pages/admin/ProductEditPage';
+import OrderListPage from './pages/admin/OrderListPage';
 
+
+const router = createBrowserRouter([
+    {
+        path: '/',
+        element: <App />,
+        errorElement: <NotFoundPage />,
+        children: [
+            { index: true, element: <HomePage /> },
+            { path: 'shop', element: <ProductListPage /> },
+            { path: 'product/:id', element: <ProductDetailPage /> },
+            { path: 'cart', element: <CartPage /> },
+            { path: 'login', element: <AuthPage /> },
+
+            {
+                path: 'admin',
+                element: <PrivateRoute adminOnly={true}><AdminLayout /></PrivateRoute>,
+                children: [
+                    { index: true, element: <DashboardPage /> },
+                    { path: 'dashboard', element: <DashboardPage /> },
+                    { path: 'products', element: <ProductListAdminPage /> },
+                    { path: 'products/create', element: <ProductCreatePage /> },
+                    { path: 'product/:id/edit', element: <ProductEditPage /> },
+                    { path: 'orders', element: <OrderListPage /> },
+                ],
+            },
+
+            {
+                element: <PrivateRoute />, 
+                children: [
+                    {
+                        element: <ProfilePage />,
+                        children: [
+                            { path: 'profile', element: <UserProfileDetails /> },
+                            { path: 'my-orders', element: <MyOrdersPage /> },
+                            { path: 'addresses', element: <AddressPage /> },
+                            { path: 'change-password', element: <ChangePasswordPage /> },
+                        ]
+                    },
+                    
+                    { path: 'checkout', element: <CheckoutPage /> },
+                ]
+            },
+        ],
+    },
+]);
 
 const AppRoutes = () => {
-    return (
-        <Routes>
-            <Route path="/" element={<App />}>
-                
-                <Route index element={<Navigate to="/home" replace />} />
-                <Route path="home" element={<HomePage />} />
-                <Route path="shop" element={<ProductListPage />} />
-                <Route path="product/:productId" element={<ProductDetailPage />} />
-                <Route path="about" element={<AboutPage />} />
-                <Route path="contact" element={<ContactPage />} />
-                <Route path="blog" element={<BlogPage />} />
-
-                <Route path="account" element={<AuthPage />} />
-
-
-                <Route path="admin" element={<PrivateRoute adminOnly={true} />}>
-                    <Route index element={<DashboardPage />} />
-                    <Route path="orders" element={<OrderListPage />} />
-
-                    <Route path="products/create" element={<ProductCreatePage />} />
-                </Route>
-
-            </Route>
-        </Routes>
-    );
+    return <RouterProvider router={router} />;
 };
 
 export default AppRoutes;

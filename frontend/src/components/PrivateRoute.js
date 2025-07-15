@@ -7,7 +7,7 @@ const PrivateRoute = ({ adminOnly = false }) => {
     const location = useLocation();
 
     if (!userInfo) {
-        return <Navigate to="/account" state={{ from: location }} replace />;
+        return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
     if (adminOnly && !userInfo.isAdmin) {

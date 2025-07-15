@@ -1,22 +1,25 @@
 import api from './api'; 
 
 const orderApi = {
-  createOrder: (orderData) => {
-    return api.post('/orders', orderData);
+  createOrder: async (orderData) => {
+    // Thêm async/await và .data
+    const response = await api.post('/orders', orderData);
+    return response.data;
   },
 
-  getMyOrders: () => {
-    return api.get('/orders/myorders'); 
+  getMyOrders: async () => {
+    const response = await api.get('/orders/myorders');
+    return response.data;
   },
 
-
-
-  getAllOrders: () => {
-    return api.get('/orders');
+  getAllOrders: async () => {
+    const response = await api.get('/orders');
+    return response.data;
   },
 
-  updateOrderStatus: (orderId, status) => {
-    return api.put(`/orders/${orderId}/status`, { status });
+  updateOrderStatus: async (orderId, status) => {
+    const response = await api.put(`/orders/${orderId}/status`, { status });
+    return response.data;
   },
 };
 

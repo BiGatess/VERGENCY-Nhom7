@@ -18,10 +18,9 @@ const ProductCardSkeleton = () => {
 
 const Sidebar = () => {
     const dispatch = useDispatch();
-    const { category: currentCategory } = useParams();
+    const { category: currentCategorySlug } = useParams();
     
-    const categorySliceState = useSelector((state) => state.categories);
-    const { categories = [], status: categoryStatus } = categorySliceState || {};
+    const { categories = [], status: categoryStatus } = useSelector((state) => state.categories);
 
     const [isOpen, setIsOpen] = useState(true);
 
@@ -41,15 +40,15 @@ const Sidebar = () => {
             {isOpen && (
                 <ul className="sidebar-list">
                     <li>
-                        <Link to="/shop" className={!currentCategory ? 'active' : ''}>
+                        <Link to="/shop" className={!currentCategorySlug ? 'active' : ''}>
                             Tất cả sản phẩm
                         </Link>
                     </li>
-                    {categoryStatus === 'succeeded' && categories && categories.map(cat => (
+                    {categoryStatus === 'succeeded' && categories.map(cat => (
                         <li key={cat._id}>
                             <Link
-                                to={`/shop/${cat.name}`}
-                                className={currentCategory === cat.name ? 'active' : ''}
+                                to={`/shop/${cat.name}`} 
+                                className={currentCategorySlug === cat.name ? 'active' : ''}
                             >
                                 {cat.name}
                             </Link>
@@ -66,14 +65,17 @@ const ProductListPage = () => {
     const dispatch = useDispatch();
     const { category } = useParams();
     
-    const productSliceState = useSelector((state) => state.products);
-    const { products = [], status, error } = productSliceState || {};
+    const { products = [], status, error } = useSelector((state) => state.products);
 
     const [sortBy, setSortBy] = useState('newest');
 
     useEffect(() => {
-        dispatch(fetchProducts({ category, sortBy }));
-    }, [dispatch, category, sortBy]);
+        const params = { sortBy };
+        if (category) {
+            params.category = category;
+        }
+        dispatch(fetchProducts(params));
+    }, [dispatch, category, sortBy]); 
     
     if (status === 'failed') { return <div className="error-message">Lỗi: {error}</div>; }
     
@@ -89,7 +91,7 @@ const ProductListPage = () => {
                 
                 <div className="product-grid-container">
                     <div className="listing-header">
-                        <h2 className="section-title-main">{category ? category : 'Tất cả sản phẩm'}</h2>
+                        <h2 className="section-title-main">{category ? category.toUpperCase() : 'Tất cả sản phẩm'}</h2>
                         <div className="sort-options">
                             <span>Sắp xếp theo:</span>
                             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
@@ -97,26 +99,25 @@ const ProductListPage = () => {
                             <option value="oldest">Cũ nhất</option>
                             <option value="price-asc">Giá: Tăng dần</option>
                             <option value="price-desc">Giá: Giảm dần</option>
-                            <option value="best-selling">Bán chạy nhất</option>
                         </select>
                         </div>
                     </div>
                     
                     <div className="product-list">
                         {status === 'loading' && (
-                            Array.from({ length: 6 }).map((_, index) => (
+                            Array.from({ length: 8 }).map((_, index) => (
                                 <ProductCardSkeleton key={index} />
                             ))
                         )}
 
-                        {status === 'succeeded' && products && products.length > 0 && (
+                        {status === 'succeeded' && products.length > 0 && (
                             products.map((product) => (
-                                <ProductCard key={product.id || product._id} product={product} />
+                                <ProductCard key={product._id} product={product} />
                             ))
                         )}
                     </div>
 
-                    {status === 'succeeded' && (!products || products.length === 0) && (
+                    {status === 'succeeded' && products.length === 0 && (
                         <div className="empty">
 						    <p>Hiện tại sản phẩm đang cập nhật. Bạn quay lại sau nhé !</p>
 					    </div>

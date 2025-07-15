@@ -15,17 +15,15 @@ const THUMBNAILS_TO_SHOW = 4;
 
 const useViewHistory = (currentProduct) => {
     const [viewedProducts, setViewedProducts] = useState([]);
-    
     const productRef = useRef(currentProduct);
     productRef.current = currentProduct;
 
     useEffect(() => {
         if (!currentProduct || !currentProduct._id) return;
-        
         const history = JSON.parse(localStorage.getItem('viewHistory') || '[]');
         setViewedProducts(history.filter(p => p._id !== currentProduct._id));
-
     }, [currentProduct?._id]); 
+
     useEffect(() => {
         return () => {
             const productToSave = productRef.current;
@@ -61,7 +59,7 @@ const ProductDetailPage = () => {
     const navigate = useNavigate();
 
     const { 
-        selectedProduct: product, 
+        productDetails: product, 
         status_single: status, 
         error_single: error,
         relatedProducts,
@@ -189,7 +187,7 @@ const ProductDetailPage = () => {
                                 <button className="btn-add-to-cart" onClick={addToCartHandler} disabled={isSoldOut}>{isSoldOut ? 'HẾT HÀNG' : 'Thêm vào giỏ'}</button>
                                 <button className="btn-buy-now" onClick={buyNowHandler} disabled={isSoldOut}>{isSoldOut ? 'HẾT HÀNG' : 'Mua ngay'}</button>
                             </div>
-                            <div className="tags-section"><p>Tags:</p></div>
+                            <div className="tags-section"><p>Tags:****</p></div>
                         </div>
                     </div>
                     <div className="product-bottom-section">

@@ -1,48 +1,61 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import orderApi from '../services/orderApi';
 
+
 export const createOrder = createAsyncThunk(
-  'orders/create',
-  async (orderData, { rejectWithValue }) => {
-    try {
-      const { data } = await orderApi.createOrder(orderData);
-      return data;
-    } catch (error) {
-      return rejectWithValue(error.response?.data.message || error.message);
+    'orders/create', 
+    async (orderData, { rejectWithValue }) => {
+        try {
+            return await orderApi.createOrder(orderData);
+        } catch (error) {
+            return rejectWithValue(error.toString());
+        }
     }
-  }
 );
 
 export const fetchAllOrders = createAsyncThunk(
-    'orders/fetchAll',
+    'orders/fetchAll', 
     async (_, { rejectWithValue }) => {
         try {
-            const { data } = await orderApi.getAllOrders();
-            return data;
+            return await orderApi.getAllOrders();
         } catch (error) {
-            return rejectWithValue(error.response?.data.message || error.message);
+            return rejectWithValue(error.toString());
+        }
+    }
+);
+
+export const fetchMyOrders = createAsyncThunk(
+    'orders/fetchMy', 
+    async (_, { rejectWithValue }) => {
+        try {
+            return await orderApi.getMyOrders();
+        } catch (error) {
+            return rejectWithValue(error.toString());
         }
     }
 );
 
 export const updateOrderAdmin = createAsyncThunk(
-    'orders/updateAdmin',
+    'orders/updateAdmin', 
     async ({ orderId, status }, { rejectWithValue }) => {
         try {
-            const { data } = await orderApi.updateOrderStatus(orderId, status);
-            return data;
+            return await orderApi.updateOrderStatus(orderId, status);
         } catch (error) {
-            return rejectWithValue(error.response?.data.message || error.message);
+            return rejectWithValue(error.toString());
         }
     }
 );
 
+
+
 const initialState = {
   order: null,      
-  orders: [],       
-  status: 'idle', 
-  error: null,
+  orders: [],     
+  status: 'idle',  
+  updateStatus: 'idle',
+  error: null,     
 };
+
 
 const orderSlice = createSlice({
   name: 'orders',
@@ -52,46 +65,36 @@ const orderSlice = createSlice({
       state.status = 'idle';
       state.order = null;
       state.error = null;
+    },
+    resetUpdateStatus: (state) => {
+        state.updateStatus = 'idle';
+        state.error = null;
     }
   },
   extraReducers: (builder) => {
     builder
-      // Cases cho createOrder
-      .addCase(createOrder.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(createOrder.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.order = action.payload;
-      })
-      .addCase(createOrder.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
-      })
+      .addCase(createOrder.pending, (state) => { state.status = 'loading'; })
+      .addCase(createOrder.fulfilled, (state, action) => { state.status = 'succeeded'; state.order = action.payload; })
+      .addCase(createOrder.rejected, (state, action) => { state.status = 'failed'; state.error = action.payload; })
 
-      // <<< THÊM MỚI: Cases cho fetchAllOrders (admin)
-      .addCase(fetchAllOrders.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(fetchAllOrders.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.orders = action.payload; // Lưu danh sách vào state.orders
-      })
-      .addCase(fetchAllOrders.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
-      })
+      .addCase(fetchAllOrders.pending, (state) => { state.status = 'loading'; })
+      .addCase(fetchMyOrders.pending, (state) => { state.status = 'loading'; })
 
-      // <<< THÊM MỚI: Cases cho updateOrderAdmin (admin)
+      .addCase(fetchAllOrders.fulfilled, (state, action) => { state.status = 'succeeded'; state.orders = action.payload; })
+      .addCase(fetchMyOrders.fulfilled, (state, action) => { state.status = 'succeeded'; state.orders = action.payload; })
+      
+      .addCase(fetchAllOrders.rejected, (state, action) => { state.status = 'failed'; state.error = action.payload; state.orders = []; })
+      .addCase(fetchMyOrders.rejected, (state, action) => { state.status = 'failed'; state.error = action.payload; state.orders = []; })
+
+      .addCase(updateOrderAdmin.pending, (state) => { state.updateStatus = 'loading'; })
       .addCase(updateOrderAdmin.fulfilled, (state, action) => {
-        // Tìm đơn hàng trong danh sách và cập nhật nó
+        state.updateStatus = 'succeeded';
         const index = state.orders.findIndex(order => order._id === action.payload._id);
-        if (index !== -1) {
-            state.orders[index] = action.payload;
-        }
-      });
+        if (index !== -1) { state.orders[index] = action.payload; }
+      })
+      .addCase(updateOrderAdmin.rejected, (state, action) => { state.updateStatus = 'failed'; state.error = action.payload; });
   },
 });
 
-export const { resetOrder } = orderSlice.actions;
+export const { resetOrder, resetUpdateStatus } = orderSlice.actions;
 export default orderSlice.reducer;

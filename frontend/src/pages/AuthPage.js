@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom'; 
 import { useDispatch, useSelector } from 'react-redux';
 import { FaGoogle, FaFacebookF } from 'react-icons/fa';
-import { loginUser, registerUser, clearUserState } from '../store/userSlice'; 
+import { loginUser, registerUser, clearUserState } from '../store/userSlice';
 import Spinner from '../components/Spinner';
 
 const AuthPage = () => {
@@ -13,17 +13,18 @@ const AuthPage = () => {
     
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const location = useLocation(); 
 
     const { userInfo, status, error } = useSelector((state) => state.user);
 
-    const redirectPath = location.state?.from?.pathname || '/';
-
     useEffect(() => {
         if (userInfo) {
-            navigate(redirectPath, { replace: true });
+            if (userInfo.isAdmin) {
+                navigate('/admin/dashboard', { replace: true }); 
+            } else {
+                navigate('/', { replace: true });
+            }
         }
-    }, [navigate, userInfo, redirectPath]);
+    }, [navigate, userInfo]); 
     
     const resetFormAndErrors = () => {
         setName('');

@@ -1,11 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { store } from './store.js';
+import { store } from './store.js'; 
 import './index.css';
 
 import App from './App';
+import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute'; 
+import AdminLayout from './components/AdminLayout';
+import ProfilePage from './pages/ProfilePage';
+import NotFoundPage from './pages/NotFoundPage'; 
+
 import HomePage from './pages/HomePage'; 
 import ProductListPage from './pages/ProductListPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -17,20 +23,22 @@ import AuthPage from './pages/AuthPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage'; 
-import PrivateRoute from './components/PrivateRoute';
+import UserProfileDetails from './pages/UserProfileDetails'; 
+import MyOrdersPage from './pages/MyOrdersPage';
+import AddressPage from './pages/AddressPage';
+import ChangePasswordPage from './pages/ChangePasswordPage'; 
 
-import AdminRoute from './components/AdminRoute';
-import AdminLayout from './components/AdminLayout';
 import DashboardPage from './pages/admin/DashboardPage';
 import OrderListPage from './pages/admin/OrderListPage';
-import ProductCreatePage from './pages/admin/ProductCreatePage';
 import ProductListAdminPage from './pages/admin/ProductListAdminPage'; 
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+    errorElement: <NotFoundPage />, 
     children: [
+     
       { index: true, element: <HomePage /> },           
       { path: 'home', element: <HomePage /> },          
       { path: 'shop', element: <ProductListPage /> }, 
@@ -40,32 +48,42 @@ const router = createBrowserRouter([
       { path: 'contact', element: <ContactPage /> },
       { path: 'blog', element: <BlogPage /> },
       { path: 'blog/:id', element: <BlogDetailPage /> }, 
-      { path: 'account', element: <AuthPage /> },
+      { path: 'account', element: <AuthPage /> }, 
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'cart', element: <CartPage /> },
+
       {
-        path: '', 
         element: <PrivateRoute />, 
         children: [
           { path: 'checkout', element: <CheckoutPage /> },
+
+          {
+            element: <ProfilePage />,
+            children: [
+                { path: 'profile', element: <UserProfileDetails /> }, 
+                { path: 'my-orders', element: <MyOrdersPage /> },
+                { path: 'addresses', element: <AddressPage /> },
+                { path: 'change-password', element: <ChangePasswordPage /> },
+            ]
+          }
+        ]
+      },
+      {
+        path: 'admin',
+        element: <AdminRoute />, 
+        children: [
+          {
+            element: <AdminLayout />, 
+            children: [
+              { index: true, element: <Navigate to="/admin/dashboard" replace /> },
+              { path: 'dashboard', element: <DashboardPage /> }, 
+              { path: 'orders', element: <OrderListPage /> },
+              { path: 'products', element: <ProductListAdminPage /> }, 
+            ]
+          }
         ]
       }
     ],
-  },
-  {
-    path: '/admin',
-    element: <AdminRoute />, 
-    children: [
-      {
-        element: <AdminLayout />, 
-        children: [
-          { index: true, element: <DashboardPage /> }, 
-          { path: 'orders', element: <OrderListPage /> },
-          { path: 'products', element: <ProductListAdminPage /> }, 
-          { path: 'products/create', element: <ProductCreatePage /> }, 
-        ]
-      }
-    ]
   }
 ]);
 

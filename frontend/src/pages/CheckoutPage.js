@@ -14,7 +14,7 @@ const HOST = "https://provinces.open-api.vn/api/";
 const OrderSummary = ({ shippingPrice }) => {
     const { cartItems } = useSelector((state) => state.cart);
     const itemsPrice = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
-    const totalPrice = itemsPrice + (shippingPrice === '—' ? 0 : shippingPrice);
+    const totalPrice = itemsPrice + (typeof shippingPrice === 'number' ? shippingPrice : 0);
 
     return (
         <aside className="order-summary-v2">
@@ -54,7 +54,7 @@ const CheckoutPage = () => {
 
     const { cartItems } = useSelector((state) => state.cart);
     const { userInfo } = useSelector((state) => state.user);
-    const { order, status, error } = useSelector((state) => state.order);
+    const { order, status, error } = useSelector((state) => state.orders); 
 
     const [shippingInfo, setShippingInfo] = useState({
         email: userInfo?.email || '',
@@ -113,11 +113,15 @@ const CheckoutPage = () => {
 
     useEffect(() => {
         if (status === 'succeeded' && order) {
-            navigate(`/order-success/${order._id}`);
+            toast.success(`Tạo đơn hàng ${order._id} thành công!`);
             dispatch(clearCart());
             dispatch(resetOrder());
+            navigate('/'); 
         }
-    }, [status, order, navigate, dispatch]);
+        if (status === 'failed') {
+            toast.error(`Lỗi tạo đơn hàng: ${error}`);
+        }
+    }, [status, order, navigate, dispatch, error]);
 
     const handleInputChange = (e) => setShippingInfo(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
