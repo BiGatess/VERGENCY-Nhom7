@@ -3,8 +3,13 @@ import mongoose from 'mongoose';
 import Product from './product.model.js';
 import Category from '../category/category.model.js';
 
-const transformProductImagePaths = (product, req) => {
-    const backendUrl = `${req.protocol}://${req.get('host')}`;
+const transformProductImagePaths = (product) => {
+    const backendUrl = process.env.BACKEND_URL;
+    
+    if (!backendUrl) {
+        return product.toObject ? product.toObject() : { ...product };
+    }
+
     const productObj = product.toObject ? product.toObject() : { ...product };
 
     if (productObj.images && Array.isArray(productObj.images)) {
@@ -17,7 +22,6 @@ const transformProductImagePaths = (product, req) => {
     }
     return productObj;
 };
-// ------------------------------------------------
 
 const getProducts = asyncHandler(async (req, res) => {
     const { category, sortBy } = req.query;
@@ -51,7 +55,7 @@ const getProducts = asyncHandler(async (req, res) => {
                                     .populate('category', 'name')
                                     .sort(sortOptions);
 
-    const transformedProducts = products.map(product => transformProductImagePaths(product, req));
+    const transformedProducts = products.map(product => transformProductImagePaths(product));
     
     res.json(transformedProducts);
 });
@@ -59,7 +63,7 @@ const getProducts = asyncHandler(async (req, res) => {
 const getProductById = asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.productId).populate('category', 'name');
     if (product) {
-        const transformedProduct = transformProductImagePaths(product, req);
+        const transformedProduct = transformProductImagePaths(product);
         res.json(transformedProduct);
     } else {
         res.status(404);
@@ -78,7 +82,7 @@ const createProduct = asyncHandler(async (req, res) => {
     });
     const createdProduct = await product.save();
 
-    const transformedProduct = transformProductImagePaths(createdProduct, req);
+    const transformedProduct = transformProductImagePaths(createdProduct);
     res.status(201).json(transformedProduct);
 });
 
@@ -97,7 +101,7 @@ const updateProduct = asyncHandler(async (req, res) => {
         const updatedProduct = await product.save();
         const populatedProduct = await Product.findById(updatedProduct._id).populate('category', 'name');
         
-        const transformedProduct = transformProductImagePaths(populatedProduct, req);
+        const transformedProduct = transformProductImagePaths(populatedProduct);
         res.json(transformedProduct);
     } else {
         res.status(404);
@@ -127,7 +131,7 @@ const getRelatedProducts = asyncHandler(async (req, res) => {
         _id: { $ne: product._id }
     }).limit(3).populate('category', 'name');
 
-    const transformedProducts = relatedProducts.map(p => transformProductImagePaths(p, req));
+    const transformedProducts = relatedProducts.map(p => transformProductImagePaths(p));
     res.json(transformedProducts);
 });
 
