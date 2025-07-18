@@ -80,7 +80,7 @@ const EnhancedModal = ({ modalData, onClose, navigate, product, selectedSize, qu
                 <p className="modal-message-v3">{message}</p>
 
                 {/* Product Preview (chỉ hiện khi success) */}
-                {type === 'success' && productDetails && (
+                {/* {type === 'success' && productDetails && (
                     <div className="modal-product-preview">
                         <img 
                             src={productDetails.image} 
@@ -95,7 +95,7 @@ const EnhancedModal = ({ modalData, onClose, navigate, product, selectedSize, qu
                             </p>
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* Action Buttons */}
                 {type === 'success' && actionText && (

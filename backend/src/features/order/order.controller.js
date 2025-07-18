@@ -1,5 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import Order from './order.model.js';
+import Product from '../product/product.model.js';
+import User from '../user/user.model.js';
 
 const addOrderItems = asyncHandler(async (req, res) => {
     const { 
@@ -43,7 +45,10 @@ const getAllOrders = asyncHandler(async (req, res) => {
 });
 
 const getOrderById = asyncHandler(async (req, res) => {
-    const order = await Order.findById(req.params.id).populate('user', 'name email');
+    const order = await Order.findById(req.params.id)
+        .populate('user', 'name email')
+        .populate('orderItems.product', 'name image');
+
     if (order) {
         if(req.user.isAdmin || order.user._id.equals(req.user._id)) {
             res.json(order);
@@ -56,10 +61,12 @@ const getOrderById = asyncHandler(async (req, res) => {
         throw new Error('Không tìm thấy đơn hàng');
     }
 });
+
 const getMyOrders = asyncHandler(async (req, res) => {
     const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json(orders);
 });
+
 const updateOrderStatus = asyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id);
 
@@ -82,10 +89,117 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     }
 });
 
+const getDashboardStats = asyncHandler(async (req, res) => {
+    const totalProducts = await Product.countDocuments();
+    const totalOrdersAllTime = await Order.countDocuments();
+    const totalCustomers = await User.countDocuments({ role: 'user' });
+    const totalRevenueAllTimeData = await Order.aggregate([
+        { $match: { status: 'Đã giao' } },
+        { $group: { _id: null, total: { $sum: '$itemsPrice' } } }
+    ]);
+    const totalRevenueAllTime = totalRevenueAllTimeData.length > 0 ? totalRevenueAllTimeData[0].total : 0;
+
+    const today = new Date();
+    const firstDayCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+
+    const currentMonthRevenueData = await Order.aggregate([
+        { $match: { status: 'Đã giao', createdAt: { $gte: firstDayCurrentMonth } } },
+        { $group: { _id: null, total: { $sum: '$itemsPrice' } } }
+    ]);
+    const currentMonthRevenue = currentMonthRevenueData.length > 0 ? currentMonthRevenueData[0].total : 0;
+    
+    const lastMonthRevenueData = await Order.aggregate([
+        { $match: { status: 'Đã giao', createdAt: { $gte: firstDayLastMonth, $lt: firstDayCurrentMonth } } },
+        { $group: { _id: null, total: { $sum: '$itemsPrice' } } }
+    ]);
+    const lastMonthRevenue = lastMonthRevenueData.length > 0 ? lastMonthRevenueData[0].total : 0;
+
+    const totalOrdersThisMonth = await Order.countDocuments({ createdAt: { $gte: firstDayCurrentMonth } });
+
+    const revenueByCategory = await Order.aggregate([
+        { $match: { status: 'Đã giao', createdAt: { $gte: firstDayCurrentMonth } } },
+        { $unwind: '$orderItems' },
+        { $lookup: { from: 'products', localField: 'orderItems.product', foreignField: '_id', as: 'productDetails' } },
+        { $unwind: '$productDetails' },
+        { $lookup: { from: 'categories', localField: 'productDetails.category', foreignField: '_id', as: 'categoryDetails' } },
+        { $unwind: '$categoryDetails' },
+        { $group: { _id: '$categoryDetails.name', revenue: { $sum: { $multiply: ['$orderItems.qty', '$orderItems.price'] } } } },
+        { $sort: { revenue: -1 } }
+    ]);
+
+    const monthlySales = await Order.aggregate([
+        { $match: { status: 'Đã giao' } },
+        { $group: {
+            _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+            totalRevenue: { $sum: '$itemsPrice' }
+        }},
+        { $sort: { '_id.year': -1, '_id.month': -1 } },
+        { $limit: 6 }
+    ]);
+
+    res.json({
+        overview: {
+            totalProducts,
+            totalOrders: totalOrdersAllTime,
+            totalCustomers,
+            totalRevenue: totalRevenueAllTime
+        },
+        monthlyReport: {
+            currentMonthRevenue,
+            lastMonthRevenue,
+            totalOrdersThisMonth,
+            revenueByCategory,
+            monthlySales
+        }
+    });
+});
+
+const getAvailablePeriods = asyncHandler(async (req, res) => {
+    const year = parseInt(req.query.year);
+
+    if (!year || isNaN(year)) {
+        res.status(400);
+        throw new Error('Vui lòng cung cấp một năm hợp lệ.');
+    }
+
+    try {
+        const availableMonths = await Order.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: new Date(`${year}-01-01T00:00:00.000Z`),
+                        $lt: new Date(`${year + 1}-01-01T00:00:00.000Z`)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: { date: "$createdAt", timezone: "Asia/Ho_Chi_Minh" } }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        const monthNumbers = availableMonths.map(item => item._id);
+        
+        res.json({
+            months: monthNumbers,
+            weeks: [] 
+        });
+
+    } catch (error) {
+        res.status(500);
+        throw new Error('Không thể lấy dữ liệu các kỳ có sẵn.');
+    }
+});
+
 export { 
     addOrderItems, 
     getAllOrders,
     getOrderById,
     updateOrderStatus,
-    getMyOrders
+    getMyOrders,
+    getDashboardStats,
+    getAvailablePeriods 
 };

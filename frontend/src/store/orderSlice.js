@@ -46,11 +46,22 @@ export const updateOrderAdmin = createAsyncThunk(
     }
 );
 
+export const fetchOrderDetails = createAsyncThunk(
+    'orders/fetchDetails', 
+    async (orderId, { rejectWithValue }) => {
+        try {
+            return await orderApi.getOrderById(orderId); 
+        } catch (error) {
+            return rejectWithValue(error.toString());
+        }
+    }
+);
 
 
 const initialState = {
   order: null,      
-  orders: [],     
+  orders: [],
+  orderDetails: null, 
   status: 'idle',  
   updateStatus: 'idle',
   error: null,     
@@ -92,7 +103,19 @@ const orderSlice = createSlice({
         const index = state.orders.findIndex(order => order._id === action.payload._id);
         if (index !== -1) { state.orders[index] = action.payload; }
       })
-      .addCase(updateOrderAdmin.rejected, (state, action) => { state.updateStatus = 'failed'; state.error = action.payload; });
+      .addCase(updateOrderAdmin.rejected, (state, action) => { state.updateStatus = 'failed'; state.error = action.payload; })
+
+      .addCase(fetchOrderDetails.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchOrderDetails.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.orderDetails = action.payload;
+      })
+      .addCase(fetchOrderDetails.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      });
   },
 });
 

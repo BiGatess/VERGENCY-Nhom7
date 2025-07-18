@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/userSlice';
+import { getAllUsers } from '../store/userSlice'; 
+import api from '../services/api';
 import './AdminLayout.css';
 
 const menuItems = [
     { path: '/admin/dashboard', icon: 'fas fa-tachometer-alt', name: 'Dashboard' },
     { path: '/admin/products', icon: 'fas fa-shopping-cart', name: 'Sản Phẩm' },
     { path: '/admin/orders', icon: 'fas fa-chart-bar', name: 'Đơn Hàng' },
-    { path: '/admin/customers', icon: 'fas fa-users', name: 'Khách Hàng' },
+    { path: '/admin/customers', icon: 'fas fa-users', name: 'Khách Hàng' }, 
     { path: '/admin/reviews', icon: 'fas fa-comments', name: 'Đánh Giá' },
     { path: '/admin/categories', icon: 'fas fa-tags', name: 'Danh Mục' },
     { path: '/admin/discounts', icon: 'fas fa-percentage', name: 'Khuyến Mãi' },
@@ -20,8 +22,24 @@ const AdminLayout = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
+    
+    const { userInfo, users } = useSelector((state) => state.user);
+    const [stats, setStats] = useState(null);
 
-    const { userInfo } = useSelector((state) => state.user);
+    useEffect(() => {
+        const fetchLayoutStats = async () => {
+            try {
+                const { data } = await api.get('/orders/stats');
+                setStats(data);
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu thống kê:", error);
+            }
+        };
+
+        fetchLayoutStats();
+        
+        dispatch(getAllUsers()); 
+    }, [dispatch]);
 
     const handleLogout = () => {
         if (window.confirm('Bạn có chắc chắn muốn đăng xuất?')) {
@@ -52,7 +70,6 @@ const AdminLayout = () => {
                     </ul>
                 </nav>
             </aside>
-
             <div className="admin-main-content">
                 <header className="admin-page-header">
                     <h2>{pageTitle}</h2>
@@ -67,99 +84,44 @@ const AdminLayout = () => {
                         </button>
                     </div>
                 </header>
-                
                 <main>
-                    {/* Stats Cards */}
-                    <div className="stats-grid">
-                        <div className="stat-card">
-                            <div className="stat-card-header">
-                                <div>
-                                    <p className="stat-card-title">Tổng sản phẩm</p>
-                                    <p className="stat-card-value"></p>
-                                </div>
-                                <div className="stat-card-icon blue">
-                                    <i className="fas fa-shopping-cart"></i>
-                                </div>
-                            </div>
-                            <div className="stat-card-footer">
-                                <span className="stat-card-change"></span>
-                                <span className="stat-card-label"></span>
-                            </div>
-                        </div>
-
-                        <div className="stat-card">
-                            <div className="stat-card-header">
-                                <div>
-                                    <p className="stat-card-title">Đơn hàng</p>
-                                    <p className="stat-card-value"></p>
-                                </div>
-                                <div className="stat-card-icon green">
-                                    <i className="fas fa-chart-bar"></i>
-                                </div>
-                            </div>
-                            <div className="stat-card-footer">
-                                <span className="stat-card-change"></span>
-                                <span className="stat-card-label"></span>
-                            </div>
-                        </div>
-
-                        <div className="stat-card">
-                            <div className="stat-card-header">
-                                <div>
-                                    <p className="stat-card-title">Khách hàng</p>
-                                    <p className="stat-card-value"></p>
-                                </div>
-                                <div className="stat-card-icon purple">
-                                    <i className="fas fa-users"></i>
-                                </div>
-                            </div>
-                            <div className="stat-card-footer">
-                                <span className="stat-card-change"></span>
-                                <span className="stat-card-label"></span>
-                            </div>
-                        </div>
-
-                        <div className="stat-card">
-                            <div className="stat-card-header">
-                                <div>
-                                    <p className="stat-card-title">Doanh thu</p>
-                                    <p className="stat-card-value"></p>
-                                </div>
-                                <div className="stat-card-icon orange">
-                                    <i className="fas fa-dollar-sign"></i>
-                                </div>
-                            </div>
-                            <div className="stat-card-footer">
-                                <span className="stat-card-change"></span>
-                                <span className="stat-card-label"></span>
-                            </div>
+                  <div className="stats-grid">
+                    <div className="stat-card">
+                        <div className="stat-card-icon blue"><i className="fas fa-shopping-cart"></i></div>
+                        <div className="stat-card-content">
+                            <p className="stat-card-title">Tổng sản phẩm</p>
+                            <p className="stat-card-value">{stats ? stats.overview.totalProducts : '...'}</p>
                         </div>
                     </div>
-
-                    {/* Content Area */}
-                    <div className="content-card">
-                        <div className="content-card-header">
-                            <h3 className="content-card-title">Nội dung {pageTitle}</h3>
-                            {/* <button className="btn-primary">
-                                <i className="fas fa-plus"></i> Thêm mới
-                            </button> */}
-                        </div>
-                        <div className="content-card-body">
-                            <div className="empty-state-icon">
-                                <i className="fas fa-shopping-cart"></i>
-                            </div>
-                            <h4 className="empty-state-title">Chào mừng đến với {pageTitle}</h4>
-                            <p className="empty-state-description">
-                                Đây là nơi bạn có thể quản lý tất cả {pageTitle.toLowerCase()} của cửa hàng
-                            </p>
+                    <div className="stat-card">
+                        <div className="stat-card-icon green"><i className="fas fa-chart-bar"></i></div>
+                        <div className="stat-card-content">
+                            <p className="stat-card-title">Tổng Đơn hàng</p>
+                            <p className="stat-card-value">{stats ? stats.overview.totalOrders : '...'}</p>
                         </div>
                     </div>
+                    <div className="stat-card">
+                        <div className="stat-card-icon purple"><i className="fas fa-users"></i></div>
+                        <div className="stat-card-content">
+                            <p className="stat-card-title">Khách hàng</p>
+                            <p className="stat-card-value">{users ? users.length : 0}</p>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-card-icon orange"><i className="fas fa-dollar-sign"></i></div>
+                        <div className="stat-card-content">
+                            <p className="stat-card-title">Tổng Doanh thu</p>
+                            <p className="stat-card-value">{stats ? stats.overview.totalRevenue.toLocaleString('vi-VN') + 'đ' : '...'}</p>
+                        </div>
+                    </div>
+                </div>
                     
-                    <Outlet />
+                    <div className="content-card">
+                       <Outlet context={stats ? stats.monthlyReport : null} />
+                    </div>
                 </main>
             </div>
         </div>
     );
 };
-
 export default AdminLayout;

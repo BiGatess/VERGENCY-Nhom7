@@ -100,7 +100,7 @@ const getRelatedProducts = asyncHandler(async (req, res) => {
     const relatedProducts = await Product.find({
         category: product.category,
         _id: { $ne: product._id }
-    }).limit(4).populate('category', 'name');
+    }).limit(3).populate('category', 'name'); 
     res.json(relatedProducts);
 });
 

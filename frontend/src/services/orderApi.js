@@ -2,7 +2,6 @@ import api from './api';
 
 const orderApi = {
   createOrder: async (orderData) => {
-    // Thêm async/await và .data
     const response = await api.post('/orders', orderData);
     return response.data;
   },
@@ -14,6 +13,11 @@ const orderApi = {
 
   getAllOrders: async () => {
     const response = await api.get('/orders');
+    return response.data;
+  },
+
+  getOrderById: async (orderId) => {
+    const response = await api.get(`/orders/${orderId}`);
     return response.data;
   },
 

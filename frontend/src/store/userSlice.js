@@ -1,5 +1,3 @@
-// userSlice.js
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import userApi from '../services/userApi';
 
@@ -35,10 +33,24 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+export const getAllUsers = createAsyncThunk(
+    'user/getAll',
+    async (_, { rejectWithValue, getState }) => {
+        try {
+            const token = getState().user.userInfo.token;
+            const data = await userApi.getAllUsers(token);
+            return data;
+        } catch (error) {
+            const message = error.response?.data?.message || error.message;
+            return rejectWithValue(message);
+        }
+    }
+)
+
 const initialState = {
   userInfo: userInfoFromStorage,
-  status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-  error: null,
+  users: [], 
+  status: 'idle', 
 };
 
 const userSlice = createSlice({
@@ -51,7 +63,6 @@ const userSlice = createSlice({
       state.status = 'idle';
       state.error = null;
     },
-    // <<< SỬA ĐỔI: THÊM REDUCER NÀY ĐỂ XÓA LỖI VÀ STATUS KHI CHUYỂN FORM
     clearUserState: (state) => {
         state.status = 'idle';
         state.error = null;
@@ -59,33 +70,23 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginUser.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
+      .addCase(loginUser.pending, (state) => { state.status = 'loading'; state.error = null; })
+      .addCase(loginUser.fulfilled, (state, action) => { state.status = 'succeeded'; state.userInfo = action.payload; })
+      .addCase(loginUser.rejected, (state, action) => { state.status = 'failed'; state.error = action.payload; })
+      .addCase(registerUser.pending, (state) => { state.status = 'loading'; state.error = null; })
+      .addCase(registerUser.fulfilled, (state, action) => { state.status = 'succeeded'; state.userInfo = action.payload; })
+      .addCase(registerUser.rejected, (state, action) => { state.status = 'failed'; state.error = action.payload; })
+
+      .addCase(getAllUsers.pending, (state) => {
       })
-      .addCase(loginUser.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.userInfo = action.payload;
+      .addCase(getAllUsers.fulfilled, (state, action) => {
+          state.users = action.payload; 
       })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
-      })
-      .addCase(registerUser.pending, (state) => {
-          state.status = 'loading';
-          state.error = null;
-      })
-      .addCase(registerUser.fulfilled, (state, action) => {
-          state.status = 'succeeded';
-          state.userInfo = action.payload;
-      })
-      .addCase(registerUser.rejected, (state, action) => {
-          state.status = 'failed';
-          state.error = action.payload;
+      .addCase(getAllUsers.rejected, (state, action) => {
+          console.error("Lỗi khi lấy danh sách user:", action.payload);
       });
   },
 });
 
 export const { logout, clearUserState } = userSlice.actions;
-
 export default userSlice.reducer;

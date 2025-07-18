@@ -31,6 +31,8 @@ import ChangePasswordPage from './pages/ChangePasswordPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import OrderListPage from './pages/admin/OrderListPage';
 import ProductListAdminPage from './pages/admin/ProductListAdminPage'; 
+import OrderDetailPage from './pages/admin/OrderDetailPage';
+import UserListPage from './pages/admin/UserListPage'; 
 
 const router = createBrowserRouter([
   {
@@ -78,7 +80,9 @@ const router = createBrowserRouter([
               { index: true, element: <Navigate to="/admin/dashboard" replace /> },
               { path: 'dashboard', element: <DashboardPage /> }, 
               { path: 'orders', element: <OrderListPage /> },
+              { path: 'order/:id', element: <OrderDetailPage /> },
               { path: 'products', element: <ProductListAdminPage /> }, 
+              { path: 'customers', element: <UserListPage /> }, 
             ]
           }
         ]

@@ -4,7 +4,9 @@ import {
     getAllOrders,
     getOrderById,
     updateOrderStatus,
-    getMyOrders 
+    getMyOrders,
+    getDashboardStats,
+    getAvailablePeriods 
 } from './order.controller.js';
 import { protect, admin } from '../auth/auth.middleware.js';
 
@@ -16,6 +18,12 @@ router.route('/')
 
 router.route('/myorders')
     .get(protect, getMyOrders);
+
+router.route('/stats')
+    .get(protect, admin, getDashboardStats);
+
+router.route('/available-periods')
+    .get(protect, admin, getAvailablePeriods);
 
 router.route('/:id/status')
     .put(protect, admin, updateOrderStatus);

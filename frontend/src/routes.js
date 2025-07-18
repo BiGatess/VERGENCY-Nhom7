@@ -1,4 +1,3 @@
-// Tên file: frontend/src/routes.js
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App';
 
@@ -23,7 +22,7 @@ import ProductListAdminPage from './pages/admin/ProductListAdminPage';
 import ProductCreatePage from './pages/admin/ProductCreatePage';
 import ProductEditPage from './pages/admin/ProductEditPage';
 import OrderListPage from './pages/admin/OrderListPage';
-
+import UserListPage from './pages/admin/UserListPage';
 
 const router = createBrowserRouter([
     {
@@ -47,6 +46,7 @@ const router = createBrowserRouter([
                     { path: 'products/create', element: <ProductCreatePage /> },
                     { path: 'product/:id/edit', element: <ProductEditPage /> },
                     { path: 'orders', element: <OrderListPage /> },
+                    { path: 'customers', element: <UserListPage /> }, 
                 ],
             },
 

@@ -213,7 +213,8 @@ const ProductDetailPage = () => {
                     <PolicySidebar />
                 </aside>
             </div>
-            {viewedProducts.length > 0 && <RelatedProducts title="Sản phẩm đã xem" products={viewedProducts} layout="horizontal" />}
+            
+            {viewedProducts.length > 0 && <RelatedProducts title="Sản phẩm đã xem:" products={viewedProducts.slice(0, 3)} layout="horizontal" />}
         </div>
     );
 };

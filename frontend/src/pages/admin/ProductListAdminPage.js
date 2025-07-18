@@ -28,7 +28,6 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
     
     const isEditMode = selectedProduct && selectedProduct._id;
 
-    // Function to reset form completely
     const resetForm = () => {
         setFormData({
             name: '', 
@@ -90,7 +89,6 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
         }
     }, [selectedProduct, isEditMode, categories]);
 
-    // Handle adding new images (append to existing)
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
