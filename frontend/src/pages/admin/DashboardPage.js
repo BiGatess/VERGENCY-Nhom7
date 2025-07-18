@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import axios from 'axios';
 import Spinner from '../../components/Spinner';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
@@ -11,6 +9,7 @@ import {
     FaTshirt, FaTag, FaUserSecret, FaDollarSign, FaShoppingCart, FaChartBar, 
     FaTimes, FaArrowLeft
 } from 'react-icons/fa';
+import api from '../../services/api'; 
 
 ChartJS.register(ArcElement, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
@@ -327,8 +326,7 @@ const DetailedView = ({
 
 const DashboardPage = () => {
     const monthlyReport = useOutletContext();
-    const { userInfo } = useSelector((state) => state.user);
-
+    
     const [isDateModalOpen, setIsDateModalOpen] = useState(false);
     const [isDetailedView, setIsDetailedView] = useState(false);
     const [activeFilterName, setActiveFilterName] = useState('Tháng này');
@@ -342,12 +340,7 @@ const DashboardPage = () => {
             const fetchAvailablePeriods = async () => {
                 setLoadingAvailability(true);
                 try {
-                    const config = {
-                        headers: {
-                            Authorization: `Bearer ${userInfo.token}`,
-                        },
-                    };
-                    const { data } = await axios.get(`/api/orders/available-periods?year=${modalYear}`, config);
+                    const { data } = await api.get(`/api/v1/orders/available-periods?year=${modalYear}`);
                     setAvailableMonths(data.months);
                 } catch (error) {
                     console.error("Lỗi khi lấy dữ liệu tháng:", error);
@@ -358,7 +351,7 @@ const DashboardPage = () => {
             };
             fetchAvailablePeriods();
         }
-    }, [isDateModalOpen, modalYear, userInfo.token]);
+    }, [isDateModalOpen, modalYear]);
 
     const handleApplyFilter = (filter) => {
         if (filter) {
@@ -411,7 +404,6 @@ const DashboardPage = () => {
         return <FaTag className="legend-icon-svg" />;
     };
 
-    // Chuẩn bị dữ liệu cho tab "Chênh lệch" từ dữ liệu thật
     const comparisonData = revenueByCategory.map(item => {
         const lastMonthData = lastMonthRevenueByCategory || [];
         const previousItem = lastMonthData.find(p => p._id === item._id);

@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/userSlice';
 import { getAllUsers } from '../store/userSlice'; 
-import api from '../services/api';
+import api from '../services/api'; 
 import './AdminLayout.css';
 
 const menuItems = [
@@ -29,7 +29,7 @@ const AdminLayout = () => {
     useEffect(() => {
         const fetchLayoutStats = async () => {
             try {
-                const { data } = await api.get('/orders/stats');
+                const { data } = await api.get('/api/v1/orders/stats');
                 setStats(data);
             } catch (error) {
                 console.error("Lỗi khi tải dữ liệu thống kê:", error);
