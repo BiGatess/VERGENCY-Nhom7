@@ -1,24 +1,18 @@
-import axios from 'axios';
-const API_URL = '/api/v1';
-
+import api from './api';
 const userApi = {
     login: async (credentials) => {
-        const { data } = await axios.post(`${API_URL}/auth/login`, credentials);
+        const { data } = await api.post('/api/v1/auth/login', credentials);
         return data;
     },
     register: async (userData) => {
-        const { data } = await axios.post(`${API_URL}/auth/register`, userData);
+        const { data } = await api.post('/api/v1/auth/register', userData);
         return data;
     },
 
-    getAllUsers: async (token) => {
-        const config = {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        };
-        const { data } = await axios.get(`${API_URL}/users`, config);
+    getAllUsers: async () => {
+        const { data } = await api.get('/api/v1/users');
         return data;
     },
 };
+
 export default userApi;
