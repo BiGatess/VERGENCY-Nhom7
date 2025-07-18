@@ -10,7 +10,7 @@ import { FaShoppingCart, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { FiTruck, FiRefreshCw, FiCreditCard, FiPhoneCall } from 'react-icons/fi';
 import RelatedProducts from '../components/RelatedProducts';
 
-const API_URL = 'http://localhost:5000'; 
+
 const THUMBNAILS_TO_SHOW = 4; 
 
 const useViewHistory = (currentProduct) => {
@@ -152,14 +152,15 @@ const ProductDetailPage = () => {
                                     <div className="thumbnail-list">
                                         {product.images?.slice(startIndex, startIndex + THUMBNAILS_TO_SHOW).map((img, index) => (
                                             <div key={startIndex + index} className={`thumbnail-item ${img === selectedImage ? 'active' : ''}`} onClick={() => setSelectedImage(img)}>
-                                                <img src={`${API_URL}${img}`} alt={`${product.name} thumbnail ${index + 1}`} />
+                                                {/* SỬA LẠI ĐÂY: Dùng trực tiếp URL từ API */}
+                                                <img src={img} alt={`${product.name} thumbnail ${index + 1}`} />
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                                 {showThumbnailArrows && <button className="scroll-arrow" onClick={handleNextThumbnails} disabled={startIndex >= product.images.length - THUMBNAILS_TO_SHOW}><FaChevronDown /></button>}
                             </div>
-                            <div className="main-image-column"><img src={selectedImage ? `${API_URL}${selectedImage}` : '/default-image.jpg'} alt={product.name} /></div>
+                            <div className="main-image-column"><img src={selectedImage || '/default-image.jpg'} alt={product.name} /></div>
                         </div>
                         <div className="info-action-column">
                             <h1>{product.name}</h1>

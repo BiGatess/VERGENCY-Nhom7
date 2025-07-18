@@ -2,8 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Rating from './Rating'; 
 
-const API_URL = 'http://localhost:5000'; 
-
 const ProductCard = ({ product }) => {
   const price = product.price || 0;
   const priceBeforeDiscount = product.priceBeforeDiscount || 0;
@@ -13,7 +11,7 @@ const ProductCard = ({ product }) => {
     : 0;
 
   const imageUrl = product.images && product.images.length > 0 
-    ? `${API_URL}${product.images[0]}` 
+    ? product.images[0] 
     : '/default-placeholder.jpg'; 
 
   return (
