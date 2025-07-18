@@ -1,34 +1,18 @@
-import axios from 'axios';
-
-const getAuthHeaders = () => {
-    const userInfoFromStorage = localStorage.getItem('userInfo')
-        ? JSON.parse(localStorage.getItem('userInfo'))
-        : null;
-
-    if (userInfoFromStorage && userInfoFromStorage.token) {
-        return {
-            Authorization: `Bearer ${userInfoFromStorage.token}`,
-        };
-    }
-    return {};
-};
-
-const API_URL = 'http://localhost:5000/api/v1/products';
+import api from './api'; 
 
 const getAllProducts = async (params = {}) => {
     try {
-        const config = { params };
-        const { data } = await axios.get(API_URL, config);
+        const { data } = await api.get('/products', { params });
         return data;
     } catch (error) {
         console.error("Lỗi khi lấy danh sách sản phẩm:", error.response || error);
-        throw error; 
+        throw error;
     }
 };
 
-const getProductById = async (productId) => { 
+const getProductById = async (productId) => {
     try {
-        const { data } = await axios.get(`${API_URL}/${productId}`);
+        const { data } = await api.get(`/products/${productId}`);
         return data;
     } catch (error) {
         console.error(`Lỗi khi lấy sản phẩm có ID ${productId}:`, error.response || error);
@@ -38,7 +22,7 @@ const getProductById = async (productId) => {
 
 const getRelatedProducts = async (productId) => {
     try {
-        const { data } = await axios.get(`${API_URL}/${productId}/related`);
+        const { data } = await api.get(`/products/${productId}/related`);
         return data;
     } catch (error) {
         console.error(`Lỗi khi lấy sản phẩm liên quan cho ID ${productId}:`, error.response || error);
@@ -66,22 +50,13 @@ const createProduct = async (productData) => {
         }
     });
 
-    const config = {
-        headers: { ...getAuthHeaders() },
-    };
-    const { data } = await axios.post(API_URL, formData, config);
+    const { data } = await api.post('/products', formData);
     return data;
 };
 
 const updateProduct = async (id, productData) => {
     try {
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeaders(),
-            },
-        };
-        const { data } = await axios.put(`${API_URL}/${id}`, productData, config);
+        const { data } = await api.put(`/products/${id}`, productData);
         return data;
     } catch (error) {
         const message = error.response?.data?.message || error.message;
@@ -92,13 +67,8 @@ const updateProduct = async (id, productData) => {
 
 const deleteProduct = async (id) => {
     try {
-        const config = {
-            headers: {
-                ...getAuthHeaders(),
-            },
-        };
-        const { data } = await axios.delete(`${API_URL}/${id}`, config);
-        return data; 
+        const { data } = await api.delete(`/products/${id}`);
+        return data;
     } catch (error) {
         const message = error.response?.data?.message || error.message;
         console.error(`Lỗi khi xóa sản phẩm có ID ${id}:`, message);
@@ -106,14 +76,13 @@ const deleteProduct = async (id) => {
     }
 };
 
-
 const productApi = {
     getAllProducts,
     getProductById,
-    getRelatedProducts, 
+    getRelatedProducts,
     createProduct,
-    updateProduct, 
-    deleteProduct, 
+    updateProduct,
+    deleteProduct,
 };
 
 export default productApi;
