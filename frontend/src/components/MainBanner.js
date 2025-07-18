@@ -19,7 +19,6 @@ const MainBanner = () => {
     return (
         <div className="main-slider-container">
             <div className="slider-wrapper" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-                {/* Render tất cả các ảnh trong slider */}
                 {slides.map((slide, index) => (
                     <div key={index} className="slide">
                         <img src={slide.image} alt={slide.alt} />
@@ -27,7 +26,6 @@ const MainBanner = () => {
                 ))}
             </div>
             
-            {/* (Tùy chọn) Thêm các nút chấm để điều hướng slider */}
             <div className="slider-dots">
                 {slides.map((_, index) => (
                     <button 
