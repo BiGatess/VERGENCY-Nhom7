@@ -3,6 +3,25 @@ import Order from './order.model.js';
 import Product from '../product/product.model.js';
 import User from '../user/user.model.js';
 
+const transformOrderImagePaths = (order) => {
+    const backendUrl = process.env.BACKEND_URL;
+    if (!backendUrl) {
+        return order.toObject ? order.toObject() : { ...order };
+    }
+
+    const orderObj = order.toObject ? order.toObject() : { ...order };
+
+    if (orderObj.orderItems && Array.isArray(orderObj.orderItems)) {
+        orderObj.orderItems = orderObj.orderItems.map(item => {
+            if (item.image && !item.image.startsWith('http')) {
+                item.image = `${backendUrl}${item.image.startsWith('/') ? '' : '/'}${item.image}`;
+            }
+            return item;
+        });
+    }
+    return orderObj;
+};
+
 const addOrderItems = asyncHandler(async (req, res) => {
     const { 
         orderItems, 
@@ -22,7 +41,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
             orderItems: orderItems.map(item => ({
                 name: item.name,
                 qty: item.qty,
-                image: item.image,
+                image: item.image, 
                 price: item.price,
                 size: item.size,
                 product: item._id, 
@@ -35,13 +54,17 @@ const addOrderItems = asyncHandler(async (req, res) => {
         });
 
         const createdOrder = await order.save();
-        res.status(201).json(createdOrder);
+        
+        const transformedOrder = transformOrderImagePaths(createdOrder);
+        res.status(201).json(transformedOrder);
     }
 });
 
 const getAllOrders = asyncHandler(async (req, res) => {
     const orders = await Order.find({}).sort({ createdAt: -1 }).populate('user', 'id name email');
-    res.json(orders);
+    
+    const transformedOrders = orders.map(order => transformOrderImagePaths(order));
+    res.json(transformedOrders);
 });
 
 const getOrderById = asyncHandler(async (req, res) => {
@@ -51,7 +74,8 @@ const getOrderById = asyncHandler(async (req, res) => {
 
     if (order) {
         if(req.user.isAdmin || order.user._id.equals(req.user._id)) {
-            res.json(order);
+            const transformedOrder = transformOrderImagePaths(order);
+            res.json(transformedOrder);
         } else {
             res.status(403);
             throw new Error('Không được phép truy cập đơn hàng này');
@@ -64,7 +88,9 @@ const getOrderById = asyncHandler(async (req, res) => {
 
 const getMyOrders = asyncHandler(async (req, res) => {
     const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
-    res.json(orders);
+    
+    const transformedOrders = orders.map(order => transformOrderImagePaths(order));
+    res.json(transformedOrders);
 });
 
 const updateOrderStatus = asyncHandler(async (req, res) => {
@@ -82,7 +108,9 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
         }
 
         const updatedOrder = await order.save();
-        res.json(updatedOrder);
+        
+        const transformedOrder = transformOrderImagePaths(updatedOrder);
+        res.json(transformedOrder);
     } else {
         res.status(404);
         throw new Error('Không tìm thấy đơn hàng');
