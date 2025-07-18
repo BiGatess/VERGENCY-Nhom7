@@ -78,16 +78,18 @@ const MyOrdersPage = () => {
                             <tr key={order._id}>
                                 <td>
                                     <Link to={`/order/${order._id}`} className="order-id-link">
-                                        #{order._id.slice(-6)}
+                                        #{order._id.slice(-6).toUpperCase()}
                                     </Link>
                                 </td>
                                 <td>{new Date(order.createdAt).toLocaleDateString('vi-VN')}</td>
                                 <td className="product-info-cell">
+                                    
                                     <img 
-                                        src={`http://localhost:5000${order.orderItems[0].image}`} 
+                                        src={order.orderItems[0].image} 
                                         alt={order.orderItems[0].name} 
                                         className="product-image-table" 
                                     />
+                                    
                                     <div>
                                         <div className="product-name-table">{order.orderItems[0].name}</div>
                                         {order.orderItems.length > 1 && (
