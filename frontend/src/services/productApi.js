@@ -30,28 +30,15 @@ const getRelatedProducts = async (productId) => {
     }
 };
 
-const createProduct = async (productData) => {
-    const formData = new FormData();
-    Object.keys(productData).forEach(key => {
-        if (key === 'images') {
-            if (productData.images && productData.images.length > 0) {
-                productData.images.forEach(imageFile => {
-                    formData.append('images', imageFile);
-                });
-            }
-        } else if (key === 'sizes') {
-             if (productData.sizes && Array.isArray(productData.sizes)) {
-                productData.sizes.forEach(size => {
-                    formData.append('sizes[]', size);
-                });
-            }
-        } else {
-            formData.append(key, productData[key]);
-        }
-    });
-
-    const { data } = await api.post('/api/v1/products', formData);
-    return data;
+const createProduct = async (productFormData) => {
+    try {
+        const { data } = await api.post('/api/v1/products', productFormData);
+        return data;
+    } catch (error) {
+        const message = error.response?.data?.message || error.message;
+        console.error(`Lỗi khi tạo sản phẩm:`, message);
+        throw new Error(message);
+    }
 };
 
 const updateProduct = async (id, productData) => {

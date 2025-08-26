@@ -7,7 +7,11 @@ const categorySchema = new mongoose.Schema({
         unique: true,
         trim: true,
     },
-    slug: { type: String, unique: true }
+    slug: { type: String, unique: true },
+    sortOrder: {
+        type: Number,
+        default: 99, 
+    }
 }, { timestamps: true });
 
 const Category = mongoose.model('Category', categorySchema);

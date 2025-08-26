@@ -1,16 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { FaGoogle, FaFacebookF } from 'react-icons/fa';
 import { loginUser, registerUser, clearUserState } from '../store/userSlice';
-import Spinner from '../components/Spinner';
+import './AuthPage.css';
+
+const FloatingLabelInput = ({ id, label, type, value, onChange, required }) => {
+    return (
+        <div className="input-group">
+            <input 
+                id={id} 
+                type={type} 
+                value={value} 
+                onChange={onChange}
+                required={required} 
+                placeholder=" " 
+            />
+            <label htmlFor={id}>{label}</label>
+        </div>
+    );
+};
 
 const AuthPage = () => {
-    const [isSignUpActive, setIsSignUpActive] = useState(false);
+    const [formType, setFormType] = useState('login'); 
+    
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    
+   
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -18,98 +34,80 @@ const AuthPage = () => {
 
     useEffect(() => {
         if (userInfo) {
-            if (userInfo.isAdmin) {
-                navigate('/admin/dashboard', { replace: true }); 
-            } else {
-                navigate('/', { replace: true });
-            }
+            navigate(userInfo.isAdmin ? '/admin/dashboard' : '/', { replace: true });
         }
-    }, [navigate, userInfo]); 
-    
+    }, [navigate, userInfo]);
+   
     const resetFormAndErrors = () => {
         setName('');
         setEmail('');
         setPassword('');
-        if (status === 'failed') {
+        if (error) {
             dispatch(clearUserState());
         }
     };
-    
-    const handleSwitchToSignUp = () => {
+   
+    const switchForm = (type) => {
         resetFormAndErrors();
-        setIsSignUpActive(true);
-    };
-
-    const handleSwitchToSignIn = () => {
-        resetFormAndErrors();
-        setIsSignUpActive(false);
+        setFormType(type);
     };
 
     const submitHandler = (e) => {
         e.preventDefault();
-        if (isSignUpActive) {
+        if (formType === 'register') {
             dispatch(registerUser({ name, email, password }));
         } else {
             dispatch(loginUser({ email, password }));
         }
     };
 
-    const SocialLoginButtons = () => (
-        <div className="social-login">
-            <div className="social-buttons-container">
-            </div>
-        </div>
-    );
-
     return (
-        <div className="auth-body">
-            <div className={`auth-container-pro ${isSignUpActive ? 'right-panel-active' : ''}`}>
-                
-                <div className="form-container sign-up-container">
-                    <form onSubmit={submitHandler}>
-                        <h1>Tạo tài khoản</h1>
-                        <input type="text" placeholder="Tên" value={name} onChange={(e) => setName(e.target.value)} required={isSignUpActive} />
-                        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                        <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                        <button type="submit" className="btn-auth-pro" disabled={status === 'loading'}>
-                            {status === 'loading' && isSignUpActive ? 'Đang xử lý...' : 'Đăng ký'}
-                        </button>
-                        {status === 'failed' && isSignUpActive && <div style={{ color: 'red', marginTop: '10px', fontSize: '14px'}}>{error}</div>}
-                        <SocialLoginButtons />
-                    </form>
+        <div className="auth-body-microsoft">
+            <div className="auth-container-microsoft">
+                <div className="form-header">
+                    <span className="brand-name">VERGENCY</span>
                 </div>
 
-                <div className="form-container sign-in-container">
-                    <form onSubmit={submitHandler}>
-                        <h1>Đăng nhập</h1>
-                        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                        <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                        <Link to="/forgot-password" style={{ textDecoration: 'none' }}>
-                        <span style={{ color: '#007bff', fontWeight: 'bold' , fontSize: '14px' }}>Quên mật khẩu? </span>
-                        </Link>
-                        <button type="submit" className="btn-auth-pro" disabled={status === 'loading'}>
-                            {status === 'loading' && !isSignUpActive ? 'Đang xử lý...' : 'Đăng nhập'}
-                        </button>
-                        {status === 'failed' && !isSignUpActive && <div style={{ color: 'red', marginTop: '10px', fontSize: '14px' }}>{error}</div>}
-                        <SocialLoginButtons />
-                    </form>
-                </div>
-
-                <div className="overlay-container">
-                    <div className="overlay">
-                        <div className="overlay-panel overlay-left">
-                            <h1>Chào mừng trở lại!</h1>
-                            <p>Để giữ kết nối với chúng tôi, vui lòng đăng nhập bằng thông tin cá nhân của bạn</p>
-                            <button className="btn-auth-pro ghost" onClick={handleSwitchToSignIn}>Đăng nhập</button>
+                {formType === 'login' ? (
+                    <form key="login-form" className="auth-form" onSubmit={submitHandler}>
+                        <h1 className="auth-title-microsoft">Đăng nhập</h1>
+                        
+                        <FloatingLabelInput id="email" label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                        <FloatingLabelInput id="password" label="Mật khẩu" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        
+                        <div className="auth-links">
+                            <Link to="/forgot-password">Quên mật khẩu?</Link>
                         </div>
-                        <div className="overlay-panel overlay-right">
-                            <h1>Xin chào, bạn mới!</h1>
-                            <p>Nhập thông tin cá nhân của bạn và bắt đầu hành trình với chúng tôi</p>
-                            <button className="btn-auth-pro ghost" onClick={handleSwitchToSignUp}>Đăng ký</button>
-                        </div>
-                    </div>
-                </div>
+                        
+                        <button type="submit" className="btn-submit-microsoft" disabled={status === 'loading'}>
+                            {status === 'loading' ? 'Đang xử lý...' : 'Đăng Nhập'}
+                        </button>
+                        
+                        {error && <div className="auth-error-microsoft">{error}</div>}
+                        
+                        <p className="switch-form-prompt">
+                            Chưa có tài khoản? <span onClick={() => switchForm('register')}>Tạo tài khoản mới!</span>
+                        </p>
+                    </form>
+                ) : (
+                    <form key="register-form" className="auth-form" onSubmit={submitHandler}>
+                        <h1 className="auth-title-microsoft">Tạo tài khoản</h1>
 
+                        <FloatingLabelInput id="name" label="Tên của bạn" type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+                        <FloatingLabelInput id="email-reg" label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                        <FloatingLabelInput id="password-reg" label="Mật khẩu" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+
+                        <button type="submit" className="btn-submit-microsoft" disabled={status === 'loading'}>
+                            {status === 'loading' ? 'Đang xử lý...' : 'Đăng Ký'}
+                        </button>
+                        
+                        {error && <div className="auth-error-microsoft">{error}</div>}
+                        
+                        <p className="switch-form-prompt">
+                            Bạn đã có tài khoản? <span onClick={() => switchForm('login')}>Đăng nhập</span>
+                        </p>
+                    </form>
+                )}
             </div>
         </div>
     );

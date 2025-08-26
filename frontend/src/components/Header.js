@@ -1,6 +1,8 @@
+// frontend/src/components/Header.js
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { FiSearch, FiUser, FiShoppingCart, FiLogOut, FiBox, FiSettings } from 'react-icons/fi';
+import { FiSearch, FiUser, FiLogOut, FiBox, FiSettings } from 'react-icons/fi';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/userSlice';
 
@@ -16,7 +18,6 @@ const Header = () => {
     
     const userMenuRef = useRef(null);
     const stickyUserMenuRef = useRef(null);
-
     const hideTimeoutRef = useRef(null);
 
     const { cartItems } = useSelector(state => state.cart);
@@ -26,23 +27,17 @@ const Header = () => {
     const categories = ['T-SHIRTS', 'SHIRTS', 'SWEATERS', 'HOODIES', 'SHORTS', 'PERFUME', 'JACKET', 'ACCESSORIES', 'POLO', 'PANTS'];
 
     useEffect(() => {
-        const handleScroll = () => {
-            setIsSticky(!isCheckoutPage && window.scrollY > 100);
-        };
+        const handleScroll = () => setIsSticky(!isCheckoutPage && window.scrollY > 100);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [isCheckoutPage]); 
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (
-                (userMenuRef.current && !userMenuRef.current.contains(event.target)) &&
-                (stickyUserMenuRef.current && !stickyUserMenuRef.current.contains(event.target))
-            ) {
+            if ((userMenuRef.current && !userMenuRef.current.contains(event.target)) && (stickyUserMenuRef.current && !stickyUserMenuRef.current.contains(event.target))) {
                 setShowUserMenu(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
@@ -74,26 +69,13 @@ const Header = () => {
     const renderHeaderActions = (isStickyVersion = false) => (
         <div className="header-actions">
             <Link to="/search"><FiSearch /></Link>
-
             {userInfo ? (
-                <div 
-                    className="user-dropdown" 
-                    ref={isStickyVersion ? stickyUserMenuRef : userMenuRef}
-                >
-                    <button 
-                        className="user-icon-link"
-                        onClick={toggleUserMenu}
-                        onMouseEnter={handleUserMenuShow}
-                        onMouseLeave={handleUserMenuHide}
-                    >
+                <div className="user-dropdown" ref={isStickyVersion ? stickyUserMenuRef : userMenuRef}>
+                    <button className="user-icon-link" onClick={toggleUserMenu} onMouseEnter={handleUserMenuShow} onMouseLeave={handleUserMenuHide}>
                         <FiUser />
                     </button>
                     {showUserMenu && (
-                        <ul 
-                            className="dropdown-menu user-menu-active"
-                            onMouseEnter={handleUserMenuEnter}
-                            onMouseLeave={handleUserMenuHide}
-                        >
+                        <ul className="dropdown-menu user-menu-active" onMouseEnter={handleUserMenuEnter} onMouseLeave={handleUserMenuHide}>
                             <li className="dropdown-header">Chào, {userInfo.name}</li>
                             <li className="divider-li"><hr /></li>
                             <li><Link to="/profile" onClick={() => setShowUserMenu(false)}><FiSettings /> Hồ sơ</Link></li>
@@ -107,9 +89,14 @@ const Header = () => {
                 <Link to="/account"><FiUser /></Link>
             )}
             
-            <Link to="/cart">
-                <FiShoppingCart />
-                {totalItemsInCart > 0 && <span className="cart-count">({totalItemsInCart})</span>}
+            {/* === ICON GIỎ HÀNG ĐÃ ĐƯỢC THAY THẾ === */}
+            <Link to="/cart" className="cart" title="Giỏ hàng">
+                <svg className="svg-next-icon svg-next-icon-size-24">
+                    <use xlinkHref="#icon-cart-header"></use>
+                </svg>
+                {totalItemsInCart > 0 && (
+                    <span id="cart-count">{totalItemsInCart}</span>
+                )}
             </Link>
         </div>
     );
@@ -120,9 +107,7 @@ const Header = () => {
                 <div className="top-bar-container">
                     <div className="phone-contact">
                         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'inherit', textDecoration: 'none' }}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                             <span>035 999 6789</span>
                         </Link>
                     </div>
@@ -132,25 +117,15 @@ const Header = () => {
                     {renderHeaderActions(false)}
                 </div>
             </div>
-
             <nav className={`main-nav ${isSticky ? 'is-sticky' : ''}`}>
                 <div className="main-nav-container">
-                    
-                    {isSticky && (
-                        <div className="logo-container-sticky">
-                             {/* <Link to="/"><img src="/images/logo2.webp" alt="Vergency Logo" style={{ height: '40px' }} /></Link> */}
-                        </div>
-                    )}
-
+                    {isSticky && <div className="logo-container-sticky"></div>}
                     <ul>
                         <li><NavLink to="/home" end>HOME</NavLink></li>
-                        
                         <li className="dropdown-li">
                             <NavLink to="/shop">SHOP</NavLink>
                             <ul className="dropdown-menu">
-                                {categories.map(cat => (
-                                    <li key={cat}><Link to={`/shop/${cat}`}>{cat}</Link></li>
-                                ))}
+                                {categories.map(cat => (<li key={cat}><Link to={`/shop/${cat}`}>{cat}</Link></li>))}
                             </ul>
                         </li>
                         <li><NavLink to="/blog">BLOG</NavLink></li>
@@ -159,9 +134,7 @@ const Header = () => {
                         <li><a href="https://www.facebook.com/groups/vergency" target="_blank" rel="noopener noreferrer">VERGENCY GROUP</a></li>
                         <li><a href="https://www.instagram.com/vergency.vn/" target="_blank" rel="noopener noreferrer">VERGENCY INSTAGRAM</a></li>
                     </ul>
-
                     {isSticky && renderHeaderActions(true)}
-                    
                 </div>
             </nav>
         </header>

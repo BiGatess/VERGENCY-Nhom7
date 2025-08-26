@@ -151,104 +151,112 @@ const CheckoutPage = () => {
     };
     
     return (
-        <div className="checkout-layout-container">
-            <main className="checkout-main">
-                <div className="checkout-header-minimal">
-                    <Link to="/home">
-                        {/* <img src="/images/logo2.webp" alt="Vergency Logo" /> */}
-                    </Link>
-                </div>
-                <div className="checkout-breadcrumb">
-                    <Link to="/cart">Giỏ hàng</Link> <span>›</span>
-                    <strong>Thông tin giao hàng</strong>
-                </div>
-                <section>
-                    <h2>Thông tin giao hàng</h2>
-                    {userInfo ? (
-                        <div className="user-info-box">
-                           <span>{userInfo.name} ({userInfo.email})</span>
-                           <button onClick={() => dispatch(logout())} className="logout-link">Đăng xuất</button>
-                        </div>
-                    ) : (
-                        <p className="login-prompt">Bạn đã có tài khoản? <Link to="/account?redirect=/checkout">Đăng nhập</Link></p>
-                    )}
-                </section>
-                <form onSubmit={placeOrderHandler}>
-                    <input type="text" name="fullName" placeholder="Họ và tên" value={shippingInfo.fullName} onChange={handleInputChange} required />
-                    <div className="form-row">
-                        <div className="form-col">
-                            <input type="email" name="email" placeholder="Email" value={shippingInfo.email} onChange={handleInputChange} required />
-                        </div>
-                        <div className="form-col">
-                            <input type="tel" name="phone" placeholder="Số điện thoại" value={shippingInfo.phone} onChange={handleInputChange} required />
-                        </div>
+        <>
+            {/* Logo Vergency ở trên cùng, click về /shop */}
+            <div className="checkout-logo">
+                <Link to="/shop" className="checkout-logo-link">
+                    <span>Vergency</span>
+                </Link>
+            </div>
+            <div className="checkout-layout-container">
+                <main className="checkout-main">
+                    <div className="checkout-header-minimal">
+                        <Link to="/home">
+                            {/* <img src="/images/logo2.webp" alt="Vergency Logo" /> */}
+                        </Link>
                     </div>
-                    {shippingInfo.phone && !isPhoneValid && <div className="phone-note">Số điện thoại phải bắt đầu bằng số 0 và bắt buộc đủ 10 số, không chứa ký tự đặc biệt và khoảng trắng</div>}
+                    <div className="checkout-breadcrumb">
+                        <Link to="/cart">Giỏ hàng</Link> <span>›</span>
+                        <strong>Thông tin giao hàng</strong>
+                    </div>
+                    <section>
+                        <h2>Thông tin giao hàng</h2>
+                        {userInfo ? (
+                            <div className="user-info-box">
+                               <span>{userInfo.name} ({userInfo.email})</span>
+                               <button onClick={() => dispatch(logout())} className="logout-link">Đăng xuất</button>
+                            </div>
+                        ) : (
+                            <p className="login-prompt">Bạn đã có tài khoản? <Link to="/account?redirect=/checkout">Đăng nhập</Link></p>
+                        )}
+                    </section>
+                    <form onSubmit={placeOrderHandler}>
+                        <input type="text" name="fullName" placeholder="Họ và tên" value={shippingInfo.fullName} onChange={handleInputChange} required />
+                        <div className="form-row">
+                            <div className="form-col">
+                                <input type="email" name="email" placeholder="Email" value={shippingInfo.email} onChange={handleInputChange} required />
+                            </div>
+                            <div className="form-col">
+                                <input type="tel" name="phone" placeholder="Số điện thoại" value={shippingInfo.phone} onChange={handleInputChange} required />
+                            </div>
+                        </div>
+                        {shippingInfo.phone && !isPhoneValid && <div className="phone-note">Số điện thoại phải bắt đầu bằng số 0 và bắt buộc đủ 10 số, không chứa ký tự đặc biệt và khoảng trắng</div>}
 
-                    <input type="text" name="address" placeholder="Địa chỉ" value={shippingInfo.address} onChange={handleInputChange} required />
-                    <div className="address-selects">
-                        <select value={selectedProvince} onChange={(e) => setSelectedProvince(e.target.value)} required>
-                            <option value="">Chọn tỉnh / thành</option>
-                            {provinces.map(p => <option key={p.code} value={p.code}>{p.name}</option>)}
-                        </select>
-                        <select value={selectedDistrict} onChange={(e) => setSelectedDistrict(e.target.value)} required>
-                            <option value="">Chọn quận / huyện</option>
-                            {districts.map(d => <option key={d.code} value={d.code}>{d.name}</option>)}
-                        </select>
-                        <select value={selectedWard} onChange={(e) => setSelectedWard(e.target.value)} required>
-                            <option value="">Chọn phường / xã</option>
-                            {wards.map(w => <option key={w.code} value={w.code}>{w.name}</option>)}
-                        </select>
-                    </div>
-                    <section className="shipping-section">
-                        <h3>Phương thức vận chuyển</h3>
-                        <div className={`shipping-option ${selectedProvince ? 'selected' : 'placeholder'}`}>
-                            {selectedProvince ? (
-                                <>
-                                    <div className="radio-wrapper">
-                                        <input type="radio" id="shipping_rate_1" name="shipping_rate" value="standard" defaultChecked />
-                                        <label htmlFor="shipping_rate_1"></label>
+                        <input type="text" name="address" placeholder="Địa chỉ" value={shippingInfo.address} onChange={handleInputChange} required />
+                        <div className="address-selects">
+                            <select value={selectedProvince} onChange={(e) => setSelectedProvince(e.target.value)} required>
+                                <option value="">Chọn tỉnh / thành</option>
+                                {provinces.map(p => <option key={p.code} value={p.code}>{p.name}</option>)}
+                            </select>
+                            <select value={selectedDistrict} onChange={(e) => setSelectedDistrict(e.target.value)} required>
+                                <option value="">Chọn quận / huyện</option>
+                                {districts.map(d => <option key={d.code} value={d.code}>{d.name}</option>)}
+                            </select>
+                            <select value={selectedWard} onChange={(e) => setSelectedWard(e.target.value)} required>
+                                <option value="">Chọn phường / xã</option>
+                                {wards.map(w => <option key={w.code} value={w.code}>{w.name}</option>)}
+                            </select>
+                        </div>
+                        <section className="shipping-section">
+                            <h3>Phương thức vận chuyển</h3>
+                            <div className={`shipping-option ${selectedProvince ? 'selected' : 'placeholder'}`}>
+                                {selectedProvince ? (
+                                    <>
+                                        <div className="radio-wrapper">
+                                            <input type="radio" id="shipping_rate_1" name="shipping_rate" value="standard" defaultChecked />
+                                            <label htmlFor="shipping_rate_1"></label>
+                                        </div>
+                                        <span>Giao hàng tận nơi</span>
+                                        <span className="shipping-price">{typeof shippingPrice === 'number' ? shippingPrice.toLocaleString('vi-VN') + '₫' : '—'}</span>
+                                    </>
+                                ) : (
+                                    <div className="shipping-placeholder">
+                                        <FiMail size={48} />
+                                        <p>Vui lòng chọn tỉnh / thành phố để có danh sách các phương thức vận chuyển.</p>
                                     </div>
-                                    <span>Giao hàng tận nơi</span>
-                                    <span className="shipping-price">{typeof shippingPrice === 'number' ? shippingPrice.toLocaleString('vi-VN') + '₫' : '—'}</span>
-                                </>
-                            ) : (
-                                <div className="shipping-placeholder">
-                                    <FiMail size={48} />
-                                    <p>Vui lòng chọn tỉnh / thành phố để có danh sách các phương thức vận chuyển.</p>
+                                )}
+                            </div>
+                        </section>
+                        <section className="payment-section">
+                            <h3>Phương thức thanh toán</h3>
+                            <div className="payment-option selected">
+                                <div className="radio-wrapper">
+                                    <input type="radio" id="payment_cod" name="payment_method" value="COD" defaultChecked />
+                                    <label htmlFor="payment_cod"></label>
                                 </div>
-                            )}
-                        </div>
-                    </section>
-                    <section className="payment-section">
-                        <h3>Phương thức thanh toán</h3>
-                        <div className="payment-option selected">
-                            <div className="radio-wrapper">
-                                <input type="radio" id="payment_cod" name="payment_method" value="COD" defaultChecked />
-                                <label htmlFor="payment_cod"></label>
+                                <div className="payment-option-label">
+                                    <img src="https://hstatic.net/0/0/global/design/seller/image/payment/cod.svg?v=6" alt="COD" />
+                                    <span>Thanh toán khi giao hàng (COD)</span>
+                                </div>
                             </div>
-                            <div className="payment-option-label">
-                                <img src="https://hstatic.net/0/0/global/design/seller/image/payment/cod.svg?v=6" alt="COD" />
-                                <span>Thanh toán khi giao hàng (COD)</span>
-                            </div>
+                        </section>
+                        <div className="checkout-notes">
+                            <ol>
+                                <li>Khi click vào nút hoàn tất đơn hàng thì đơn hàng sẽ được hệ thống tự động xác nhận mà không cần phải gọi qua điện thoại, nếu điền thông tin địa chỉ và số điện thoại chính xác thì đơn hàng sẽ được vận chuyển từ 3-4-5 ngày tùy vùng miền.</li>
+                                <li>Trường hợp đặt hàng xong nhưng nhưng muốn HỦY ĐƠN, vui lòng soạn tin nhắn theo cú pháp: SĐT ĐÃ ĐẶT ĐƠN (hoặc MÃ ĐƠN hoặc EMAIL ĐƠN HÀNG) + TÊN NGƯỜI NHẬN sau đó gửi qua các kênh online: Page Facebook, Intagram. Nhân viên check tin nhắn sẽ xử lý hủy giúp Quý KH.</li>
+                            </ol>
                         </div>
-                    </section>
-                    <div className="checkout-notes">
-                        <ol>
-                            <li>Khi click vào nút hoàn tất đơn hàng thì đơn hàng sẽ được hệ thống tự động xác nhận mà không cần phải gọi qua điện thoại, nếu điền thông tin địa chỉ và số điện thoại chính xác thì đơn hàng sẽ được vận chuyển từ 3-4-5 ngày tùy vùng miền.</li>
-                            <li>Trường hợp đặt hàng xong nhưng nhưng muốn HỦY ĐƠN, vui lòng soạn tin nhắn theo cú pháp: SĐT ĐÃ ĐẶT ĐƠN (hoặc MÃ ĐƠN hoặc EMAIL ĐƠN HÀNG) + TÊN NGƯỜI NHẬN sau đó gửi qua các kênh online: Page Facebook, Intagram. Nhân viên check tin nhắn sẽ xử lý hủy giúp Quý KH.</li>
-                        </ol>
-                    </div>
-                    <div className="form-footer">
-                        <Link to="/cart" className="return-link">‹ Giỏ hàng</Link>
-                        <button type="submit" className="btn-place-order-v2" disabled={status === 'loading' || !isFormComplete || !isPhoneValid}>
-                            {status === 'loading' ? <Spinner size="small" /> : 'Hoàn tất đơn hàng'}
-                        </button>
-                    </div>
-                </form>
-            </main>
-            <OrderSummary shippingPrice={shippingPrice} />
-        </div>
+                        <div className="form-footer">
+                            <Link to="/cart" className="return-link">‹ Giỏ hàng</Link>
+                            <button type="submit" className="btn-place-order-v2" disabled={status === 'loading' || !isFormComplete || !isPhoneValid}>
+                                {status === 'loading' ? <Spinner size="small" /> : 'Hoàn tất đơn hàng'}
+                            </button>
+                        </div>
+                    </form>
+                </main>
+                <OrderSummary shippingPrice={shippingPrice} />
+            </div>
+        </>
     );
 };
 export default CheckoutPage;

@@ -20,7 +20,7 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
 
     const [formData, setFormData] = useState({
         name: '', price: 0, priceBeforeDiscount: 0, sku: '', category: '',
-        countInStock: 0, sizes: '', description: '',
+        countInStock: 0, sizes: 'S, M, L, XL', description: '',
     });
     const [images, setImages] = useState([]);
     const [imagePreviews, setImagePreviews] = useState([]);
@@ -28,7 +28,7 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
     
     const isEditMode = selectedProduct && selectedProduct._id;
 
-    const resetForm = () => {
+    const resetForm = React.useCallback(() => {
         setFormData({
             name: '', 
             price: 0, 
@@ -36,24 +36,22 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
             sku: '', 
             category: categories[0]?._id || '',
             countInStock: 0, 
-            sizes: '', 
+            sizes: 'S, M, L, XL', 
             description: '',
         });
         setImages([]);
         setImagePreviews([]);
-        // Clear file input
         const fileInput = document.getElementById('image-upload');
         if (fileInput) {
             fileInput.value = '';
         }
-    };
+    }, [categories]);
 
-    // Force reset when not in edit mode and selectedProduct is null
     useEffect(() => {
         if (!isEditMode && selectedProduct === null && categories.length > 0) {
             resetForm();
         }
-    }, [selectedProduct, isEditMode, categories]);
+    }, [selectedProduct, isEditMode, categories, resetForm]);
 
     useEffect(() => {
         const fetchCategoriesData = async () => {
@@ -82,37 +80,37 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
                 sizes: selectedProduct.sizes?.join(', ') || '',
                 description: selectedProduct.description || '',
             });
-            setImagePreviews(selectedProduct.images ? selectedProduct.images.map(img => `http://localhost:5000${img}`) : []);
+            setImagePreviews(selectedProduct.images ? selectedProduct.images.map(img => img.startsWith('http') ? img : `http://localhost:5000${img}`) : []);
             setImages([]);
         } else {
             resetForm();
         }
-    }, [selectedProduct, isEditMode, categories]);
+    }, [selectedProduct, isEditMode, categories, resetForm]);
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
 
-        // Add new files to existing images
-        setImages(prev => [...prev, ...files]);
+        setImages(prevImages => prevImages.concat(files));
         
-        // Create new previews and add to existing
         const newPreviews = files.map(file => URL.createObjectURL(file));
-        setImagePreviews(prev => [...prev, ...newPreviews]);
+        setImagePreviews(prevPreviews => prevPreviews.concat(newPreviews));
         
-        // Clear file input to allow selecting same files again
         e.target.value = '';
     };
 
-    // Remove specific image
-    const removeImage = (index) => {
-        // Revoke URL to prevent memory leaks
-        if (imagePreviews[index] && imagePreviews[index].startsWith('blob:')) {
-            URL.revokeObjectURL(imagePreviews[index]);
+    const removeImage = (indexToRemove) => {
+        const previewToRemove = imagePreviews[indexToRemove];
+
+        if (previewToRemove && previewToRemove.startsWith('blob:')) {
+            URL.revokeObjectURL(previewToRemove);
         }
-        
-        setImages(prev => prev.filter((_, i) => i !== index));
-        setImagePreviews(prev => prev.filter((_, i) => i !== index));
+
+        const newImages = images.filter((_, index) => index !== indexToRemove);
+        const newImagePreviews = imagePreviews.filter((_, index) => index !== indexToRemove);
+
+        setImages(newImages);
+        setImagePreviews(newImagePreviews);
     };
 
     const handleInputChange = (field, value) => {
@@ -121,24 +119,42 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
 
     const submitHandler = (e) => {
         e.preventDefault();
-        const productData = { 
-            ...formData, 
-            sizes: String(formData.sizes || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
-            images: isEditMode ? undefined : images
+
+        const sanitizedFormData = {
+            ...formData,
+            price: Number(String(formData.price).replace(/[^0-9]/g, '')) || 0,
+            priceBeforeDiscount: Number(String(formData.priceBeforeDiscount).replace(/[^0-9]/g, '')) || 0,
         };
 
         if (isEditMode) {
+            const productData = {
+                ...sanitizedFormData,
+                sizes: String(formData.sizes || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
+            };
             dispatch(updateProduct({ productId: selectedProduct._id, productData }));
         } else {
             if (images.length === 0) {
                 toast.error('Vui lòng tải lên ít nhất một hình ảnh.');
                 return;
             }
-            dispatch(createProduct(productData));
+
+            const productFormData = new FormData();
+            
+            Object.keys(sanitizedFormData).forEach(key => {
+                if (key !== 'sizes') {
+                    productFormData.append(key, sanitizedFormData[key]);
+                }
+            });
+            productFormData.append('sizes', formData.sizes); 
+
+            for (let i = 0; i < images.length; i++) {
+                productFormData.append('images', images[i]);
+            }
+            
+            dispatch(createProduct(productFormData));
         }
     };
 
-    // Clean up URLs on unmount
     useEffect(() => {
         return () => {
             imagePreviews.forEach(url => {
@@ -147,7 +163,7 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
                 }
             });
         };
-    }, []);
+    }, [imagePreviews]);
     
     return (
         <div className="admin-form-card">
@@ -183,10 +199,9 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
                     <div className="form-group-half">
                         <label>Giá Bán (VND)</label>
                         <input 
-                            type="number" 
-                            min="0" 
-                            value={formData.price} 
-                            onChange={(e) => handleInputChange('price', e.target.value)} 
+                            type="text" 
+                            value={Number(formData.price).toLocaleString('vi-VN')}
+                            onChange={(e) => handleInputChange('price', e.target.value.replace(/[^0-9]/g, ''))} 
                             required 
                             placeholder="0"
                         />
@@ -194,10 +209,9 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
                     <div className="form-group-half">
                         <label>Giá Gốc (VND)</label>
                         <input 
-                            type="number" 
-                            min="0" 
-                            value={formData.priceBeforeDiscount} 
-                            onChange={(e) => handleInputChange('priceBeforeDiscount', e.target.value)} 
+                            type="text" 
+                            value={Number(formData.priceBeforeDiscount).toLocaleString('vi-VN')}
+                            onChange={(e) => handleInputChange('priceBeforeDiscount', e.target.value.replace(/[^0-9]/g, ''))} 
                             placeholder="0"
                         />
                     </div>
@@ -222,7 +236,6 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
                             onChange={(e) => handleInputChange('category', e.target.value)} 
                             required
                         >
-                            <option value="" disabled>-- Chọn danh mục --</option>
                             {categories.map(cat => (
                                 <option key={cat._id} value={cat._id}>{cat.name}</option>
                             ))}
@@ -246,41 +259,35 @@ const ProductForm = ({ selectedProduct, clearSelection }) => {
                         {isEditMode && " (Không hỗ trợ sửa ảnh ở đây)"}
                     </label>
                     
-                    {/* Image Preview Container */}
                     <div className="image-preview-container">
                         {imagePreviews.map((src, i) => (
                             <div key={i} className="image-preview-item">
                                 <img src={src} alt={`preview-${i}`} />
-                                {!isEditMode && (
-                                    <button 
-                                        type="button" 
-                                        className="remove-image-btn"
-                                        onClick={() => removeImage(i)}
-                                        title="Xóa ảnh"
-                                    >
-                                        <FaTimes />
-                                    </button>
-                                )}
+                                <button 
+                                    type="button" 
+                                    className="remove-image-btn"
+                                    onClick={() => removeImage(i)}
+                                    title="Xóa ảnh"
+                                >
+                                    <FaTimes />
+                                </button>
                             </div>
                         ))}
                     </div>
                     
-                    {/* Upload Button - Moved below images */}
-                    {!isEditMode && (
-                        <div className="upload-section">
-                            <label htmlFor="image-upload" className="upload-label">
-                                <FaUpload /> Chọn thêm ảnh
-                            </label>
-                            <input 
-                                id="image-upload" 
-                                type="file" 
-                                onChange={handleImageChange} 
-                                multiple 
-                                hidden 
-                                accept="image/*" 
-                            />
-                        </div>
-                    )}
+                    <div className="upload-section">
+                        <label htmlFor="image-upload" className="upload-label">
+                            <FaUpload /> Chọn thêm ảnh
+                        </label>
+                        <input 
+                            id="image-upload" 
+                            type="file" 
+                            onChange={handleImageChange} 
+                            multiple 
+                            hidden 
+                            accept="image/*" 
+                        />
+                    </div>
                 </div>
                 
                 <div className="form-group-full">
@@ -320,7 +327,7 @@ const ProductManagementPage = () => {
     const dispatch = useDispatch();
     const { products, status, error, createStatus, updateStatus, deleteStatus } = useSelector((state) => state.products);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [formKey, setFormKey] = useState(0); // Add key to force re-render
+    const [formKey, setFormKey] = useState(0); 
     const formRef = useRef(null);
 
     useEffect(() => {
@@ -333,10 +340,8 @@ const ProductManagementPage = () => {
         if (createStatus === 'succeeded') { 
             toast.success('Tạo sản phẩm thành công!'); 
             dispatch(resetCreateStatus()); 
-            // Force reset form by setting selectedProduct to null and updating key
             setSelectedProduct(null);
-            setFormKey(prev => prev + 1); // Force re-render
-            // Refresh products list
+            setFormKey(prev => prev + 1); 
             dispatch(fetchProducts());
         }
         if (createStatus === 'failed') { 
@@ -350,6 +355,7 @@ const ProductManagementPage = () => {
             toast.success('Cập nhật thành công!'); 
             dispatch(resetUpdateStatus()); 
             setSelectedProduct(null); 
+            dispatch(fetchProducts());
         }
         if (updateStatus === 'failed') { 
             toast.error(`Cập nhật thất bại: ${error}`); 
@@ -385,7 +391,7 @@ const ProductManagementPage = () => {
 
     const handleCreateNew = () => {
         setSelectedProduct(null); 
-        setFormKey(prev => prev + 1); // Force re-render
+        setFormKey(prev => prev + 1); 
         formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
@@ -398,7 +404,6 @@ const ProductManagementPage = () => {
 
     return (
         <div className="admin-management-page">
-            {/* Danh sách sản phẩm */}
             <div className="admin-list-container">
                 <div className="admin-list-header">
                     <h1>Danh sách Sản phẩm</h1>
@@ -490,7 +495,6 @@ const ProductManagementPage = () => {
                 )}
             </div>
             
-            {/* Form tạo/sửa sản phẩm */}
             <div ref={formRef} className="admin-form-container">
                 <ProductForm 
                     key={formKey} 

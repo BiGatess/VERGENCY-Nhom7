@@ -72,23 +72,46 @@ const getProductById = asyncHandler(async (req, res) => {
 });
 
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, price, priceBeforeDiscount, sku, category, countInStock, sizes, description } = req.body;
+    console.log('==================== NEW REQUEST ====================');
+    console.log('--- BODY NHẬN ĐƯỢC ---:', req.body);
+    console.log('--- FILES NHẬN ĐƯỢC ---:', req.files);
+    console.log('=====================================================');
+
+    const { name, price, priceBeforeDiscount, sku, category, countInStock, description } = req.body;
     
+    if (!req.files || req.files.length === 0) {
+        res.status(400);
+        throw new Error('Vui lòng tải lên ít nhất một hình ảnh cho sản phẩm.');
+    }
     const images = req.files.map(file => `/images/${file.filename}`);
 
-    const product = new Product({
-        user: req.user._id, name, price, priceBeforeDiscount, sku, category,
-        countInStock, sizes, description, images,
-    });
-    const createdProduct = await product.save();
+    let sizesArray = [];
+    if (req.body.sizes && typeof req.body.sizes === 'string') {
+        sizesArray = req.body.sizes.split(',').map(s => s.trim()).filter(s => s);
+    }
 
+    const product = new Product({
+        user: req.user._id,
+        name,
+        price,
+        priceBeforeDiscount,
+        sku,
+        category,
+        countInStock,
+        description,
+        images,
+        sizes: sizesArray,
+    });
+
+    const createdProduct = await product.save();
     const transformedProduct = transformProductImagePaths(createdProduct);
     res.status(201).json(transformedProduct);
 });
 
 const updateProduct = asyncHandler(async (req, res) => {
-    const { name, price, priceBeforeDiscount, sku, category, countInStock, sizes, description } = req.body;
+    const { name, price, priceBeforeDiscount, sku, category, countInStock, description } = req.body;
     const product = await Product.findById(req.params.productId);
+
     if (product) {
         product.name = name || product.name;
         product.price = price !== undefined ? price : product.price;
@@ -96,8 +119,16 @@ const updateProduct = asyncHandler(async (req, res) => {
         product.sku = sku || product.sku;
         product.category = category || product.category;
         product.countInStock = countInStock !== undefined ? countInStock : product.countInStock;
-        product.sizes = sizes !== undefined ? sizes : product.sizes;
         product.description = description || product.description;
+
+        if (req.body.sizes !== undefined) {
+             if (typeof req.body.sizes === 'string') {
+                product.sizes = req.body.sizes.split(',').map(s => s.trim()).filter(s => s);
+            } else {
+                product.sizes = req.body.sizes;
+            }
+        }
+        
         const updatedProduct = await product.save();
         const populatedProduct = await Product.findById(updatedProduct._id).populate('category', 'name');
         

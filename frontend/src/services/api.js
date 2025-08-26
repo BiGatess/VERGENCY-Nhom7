@@ -4,9 +4,7 @@ const baseURL = process.env.REACT_APP_API_URL;
 
 const api = axios.create({
     baseURL: baseURL, 
-    headers: {
-        'Content-Type': 'application/json',
-    },
+   
 });
 
 api.interceptors.request.use(
@@ -18,6 +16,11 @@ api.interceptors.request.use(
         if (userInfoFromStorage?.token) {
             config.headers.Authorization = `Bearer ${userInfoFromStorage.token}`;
         }
+        
+        if (config.data instanceof FormData) {
+            delete config.headers['Content-Type'];
+        }
+
         return config;
     },
     (error) => {

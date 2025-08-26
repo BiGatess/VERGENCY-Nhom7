@@ -165,7 +165,8 @@ const ProductDetailPage = () => {
                         <div className="info-action-column">
                             <h1>{product.name}</h1>
                             <p className="sku">SKU: {product.sku || 'N/A'}</p> 
-                            <Rating value={product.rating} text={`${product.numReviews} đánh giá`} />
+                            {/* === THAY ĐỔI DUY NHẤT Ở ĐÂY === */}
+                            <Rating />
                             <div className="price-box">
                                 <span className="current-price">{product.price.toLocaleString('vi-VN')}₫</span>
                                 {product.priceBeforeDiscount > product.price && <span className="original-price">{product.priceBeforeDiscount.toLocaleString('vi-VN')}₫</span>}
